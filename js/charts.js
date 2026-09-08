@@ -1,0 +1,1 @@
+window.UI={donut:(pct,label='EXECUÇÃO')=>`<div class="donut" style="--p:${Math.max(0,Math.min(100,pct))}"><div class="donut-center"><b>${pct}%</b><span>${label}</span></div></div>`,row:(cls,name,n,total)=>`<div class="row"><span><i class="dot ${cls}"></i>${name}</span><span>${n}</span><span>${total?Math.round(n/total*100):0}%</span></div>`};

@@ -1,0 +1,10 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard Plano de Ação</title><link rel="stylesheet" href="css/style.css"></head><body>
+<div id="app">
+<aside id="editor" class="editor"><h1>Gerador de Relatório</h1><p class="muted">Edite os dados; o dashboard atualiza automaticamente.</p>
+<div class="tabs"><button data-view="mensal" class="active">Visão Geral</button><button data-view="consolidado">Consolidado</button></div>
+<label>Título<input id="titleInput"></label><label>Subtítulo<input id="subtitleInput"></label><label>Período<input id="periodInput"></label><label>Atualizado em<input id="dateInput" type="date"></label>
+<section id="monthlyEditor"><div class="section-head"><h2>Meses</h2><button id="addMonth">+ Adicionar</button></div><div id="monthEditors"></div></section>
+<section id="unitEditor" hidden><div class="section-head"><h2>Superintendências / Diretorias</h2><button id="addUnit">+ Adicionar</button></div><label>Ações totais do projeto<input id="projectTotal" type="number" min="0"></label><div id="unitEditors"></div></section>
+<div class="actions"><button id="presentation">Modo apresentação</button><button id="exportJson">Exportar dados</button><label class="filebtn">Importar dados<input id="importJson" type="file" accept="application/json" hidden></label><button id="reset">Restaurar exemplo</button></div></aside>
+<main class="stage"><section id="dashboard" class="dashboard"></section></main></div>
+<script src="js/calculations.js"></script><script src="js/charts.js"></script><script src="js/app.js"></script></body></html>
