@@ -15,13 +15,14 @@
     <div class="tabs">
       <button data-view="mensal" class="active">Visão Geral</button>
       <button data-view="consolidado">Consolidado</button>
-      <button data-view="sg">SG por Diretoria</button>
+      <button data-view="sgDiretoria">SG por Diretoria</button>
     </div>
 
     <section class="editor-block">
       <div class="section-head"><h2>Cabeçalho</h2></div>
       <label id="monthlyTitleLabel">Título — Visão Geral<input id="monthlyTitleInput"></label>
       <label id="consolidatedTitleLabel" hidden>Título — Consolidado<input id="consolidatedTitleInput"></label>
+      <label id="sgTitleLabel" hidden>Título — SG por Diretoria<input id="sgTitleInput"></label>
       <label>Subtítulo<input id="subtitleInput"></label>
       <label>Período<input id="periodInput"></label>
       <label>Atualizado em<input id="dateInput" type="date"></label>
@@ -42,6 +43,12 @@
       <label>Título do consolidado<input id="consolidatedHeadingInput"></label>
     </section>
 
+    <section id="sgTextEditor" class="editor-block" hidden>
+      <div class="section-head"><h2>Textos — SG por Diretoria</h2></div>
+      <label>Título da visão mensal<input id="sgMonthlySectionTitleInput"></label>
+      <label>Título da seção por diretoria<input id="sgDirectorSectionTitleInput"></label>
+    </section>
+
     <details class="editor-block">
       <summary>Categorias e siglas</summary>
       <p class="muted">As cores permanecem padronizadas; nomes e siglas são editáveis.</p>
@@ -51,13 +58,6 @@
     <section id="monthlyEditor">
       <div class="section-head"><h2>Meses</h2><button id="addMonth">+ Adicionar</button></div>
       <div id="monthEditors"></div>
-    </section>
-
-    <section id="sgTextEditor" class="editor-block" hidden>
-      <div class="section-head"><h2>Textos — SG por Diretoria</h2></div>
-      <label>Título do dashboard<input id="sgTitleInput"></label>
-      <label>Título da seção mensal<input id="sgMonthlySectionTitleInput"></label>
-      <label>Título da seção por diretoria<input id="sgDirectorSectionTitleInput"></label>
     </section>
 
     <section id="unitEditor" hidden>
@@ -70,7 +70,7 @@
 
     <section id="directorEditor" hidden>
       <div class="section-head"><h2>Diretorias — SG</h2><button id="addDirector">+ Adicionar</button></div>
-      <p class="muted">Informe RL, RP, CA e PD de cada diretoria. PV e execução são calculados automaticamente.</p>
+      <p class="muted">Cadastre os valores consolidados de cada diretoria. O total previsto e a execução são calculados automaticamente.</p>
       <div id="directorEditors"></div>
     </section>
 

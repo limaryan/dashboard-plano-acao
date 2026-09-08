@@ -14,8 +14,8 @@
     overviewLabel:'VISÃO GERAL',
     consolidatedHeading:'Execução consolidada de março a agosto',
     sgTitle:'SG — Acompanhamento do Plano de Ação',
-    sgMonthlySectionTitle:'EVOLUÇÃO MENSAL — SG',
-    sgDirectorSectionTitle:'EXECUÇÃO POR DIRETORIA',
+    sgMonthlySectionTitle:'VISÃO GERAL MENSAL',
+    sgDirectorSectionTitle:'ESTRATIFICADO POR DIRETORIA',
     projectTotal:2316,
     realizedUntilPeriod:1009,
     categories:{
@@ -80,9 +80,9 @@
 
     monthEditors.innerHTML=state.months.map((m,i)=>`<div class="entry" data-mi="${i}"><div class="entry-top"><input data-k="name" value="${esc(m.name)}"><button class="delete" data-del-month="${i}">Excluir</button></div><div class="grid-inputs">${['rl','rp','ca','pd'].map(k=>`<label>${esc(cat(k).code)}<input type="number" min="0" data-k="${k}" value="${m[k]}"></label>`).join('')}</div></div>`).join('');
 
-    directorEditors.innerHTML=state.directors.map((d,i)=>`<div class="entry" data-di="${i}"><div class="entry-top"><input data-k="name" value="${esc(d.name)}"><button class="delete" data-del-director="${i}">Excluir</button></div><div class="grid-inputs">${['rl','rp','ca','pd'].map(k=>`<label>${esc(cat(k).code)}<input type="number" min="0" data-k="${k}" value="${d[k]}"></label>`).join('')}</div></div>`).join('');
-
     unitEditors.innerHTML=state.units.map((u,i)=>`<div class="entry" data-ui="${i}"><div class="entry-top"><input data-k="name" value="${esc(u.name)}"><button class="delete" data-del-unit="${i}">Excluir</button></div><div class="grid-inputs"><label>Previstas<input type="number" min="0" data-k="planned" value="${u.planned}"></label><label>Realizadas<input type="number" min="0" data-k="realized" value="${u.realized}"></label></div></div>`).join('');
+
+    directorEditors.innerHTML=state.directors.map((d,i)=>`<div class="entry" data-di="${i}"><div class="entry-top"><input data-k="name" value="${esc(d.name)}"><button class="delete" data-del-director="${i}">Excluir</button></div><div class="grid-inputs">${['rl','rp','ca','pd'].map(k=>`<label>${esc(cat(k).code)}<input type="number" min="0" data-k="${k}" value="${d[k]}"></label>`).join('')}</div></div>`).join('');
   }
 
   function header(title){
@@ -128,22 +128,23 @@
     </div>`;
   }
 
-  function sgDashboard(){
-    return header(state.sgTitle)+`<div class="content">
-      <h2 class="section-title">${esc(state.sgMonthlySectionTitle)}</h2>
-      <div class="months sg-months">${state.months.map(m=>{
+
+  function sgDiretoria(){
+    return header(state.sgTitle)+`<div class="content sg-detail">
+      <h2 class="section-title sg-section-title">${esc(state.sgMonthlySectionTitle)}</h2>
+      <div class="sg-months">${state.months.map(m=>{
         const pv=Calc.pv(m);
-        return `<div class="card month-card"><h3>${esc(m.name).toUpperCase()}</h3>${UI.statusDonut(m)}<div class="rows">${['rl','rp','ca','pd'].map(k=>UI.row(k,esc(cat(k).code),m[k],pv)).join('')}</div><div class="total"><span>TOTAL PREVISTO</span><span>${pv.toLocaleString('pt-BR')}</span></div></div>`
+        return `<div class="card sg-month-card"><h3>${esc(m.name).toUpperCase()}</h3>${UI.statusDonut(m)}<div class="sg-mini-rows">${['rl','rp','ca','pd'].map(k=>UI.row(k,esc(cat(k).code),m[k],pv)).join('')}</div><div class="total"><span>PV</span><span>${pv.toLocaleString('pt-BR')}</span></div></div>`
       }).join('')}</div>
-      <h2 class="section-title">${esc(state.sgDirectorSectionTitle)}</h2>
-      <div class="directors">${state.directors.map(d=>{
+      <h2 class="section-title sg-section-title sg-director-title">${esc(state.sgDirectorSectionTitle)}</h2>
+      <div class="sg-directors">${state.directors.map(d=>{
         const pv=Calc.pv(d), pct=pv>0?Calc.pct(d.rl,pv):null;
-        return `<div class="card director-card"><h2>${esc(d.name)}</h2>${UI.donut(pct,'EXECUÇÃO')}<div class="rows">${['rl','rp','ca','pd'].map(k=>UI.row(k,esc(cat(k).code),d[k],pv)).join('')}</div><div class="total"><span>TOTAL PREVISTO</span><span>${pv.toLocaleString('pt-BR')}</span></div></div>`
+        return `<div class="card sg-director-card"><h3>${esc(d.name)}</h3>${UI.donut(pct,'CONCLUSÃO')}<div class="sg-mini-rows">${['rl','rp','ca','pd'].map(k=>UI.row(k,esc(cat(k).code),d[k],pv)).join('')}</div><div class="total"><span>PV</span><span>${pv.toLocaleString('pt-BR')}</span></div></div>`
       }).join('')}</div>
     </div>`;
   }
 
-  function render(){dashboard.innerHTML=view==='mensal'?monthly():view==='consolidado'?consolidated():sgDashboard();save()}
+  function render(){dashboard.innerHTML=view==='mensal'?monthly():view==='consolidado'?consolidated():sgDiretoria();save()}
 
   function bindText(id,key){$(id).addEventListener('input',e=>{state[key]=e.target.value;render()})}
   function bind(){
@@ -175,8 +176,8 @@
     });
 
     monthEditors.addEventListener('input',e=>{const box=e.target.closest('[data-mi]');if(!box)return;const k=e.target.dataset.k,i=+box.dataset.mi;state.months[i][k]=k==='name'?e.target.value:num(e.target.value);render()});
-    directorEditors.addEventListener('input',e=>{const box=e.target.closest('[data-di]');if(!box)return;const k=e.target.dataset.k,i=+box.dataset.di;state.directors[i][k]=k==='name'?e.target.value:num(e.target.value);render()});
     unitEditors.addEventListener('input',e=>{const box=e.target.closest('[data-ui]');if(!box)return;const k=e.target.dataset.k,i=+box.dataset.ui;state.units[i][k]=k==='name'?e.target.value:num(e.target.value);render()});
+    directorEditors.addEventListener('input',e=>{const box=e.target.closest('[data-di]');if(!box)return;const k=e.target.dataset.k,i=+box.dataset.di;state.directors[i][k]=k==='name'?e.target.value:num(e.target.value);render()});
 
     document.addEventListener('click',e=>{
       if(e.target.dataset.delMonth!==undefined){state.months.splice(+e.target.dataset.delMonth,1);renderEditors();render()}
@@ -191,9 +192,9 @@
     document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{
       view=b.dataset.view;
       document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===b));
-      monthlyEditor.hidden=!(view==='mensal'||view==='sg');monthlyTextEditor.hidden=view!=='mensal';monthlyTitleLabel.hidden=view!=='mensal';
+      monthlyEditor.hidden=view!=='mensal' && view!=='sgDiretoria';monthlyTextEditor.hidden=view!=='mensal';monthlyTitleLabel.hidden=view!=='mensal';
       unitEditor.hidden=view!=='consolidado';consolidatedTextEditor.hidden=view!=='consolidado';consolidatedTitleLabel.hidden=view!=='consolidado';
-      sgTextEditor.hidden=view!=='sg';directorEditor.hidden=view!=='sg';
+      directorEditor.hidden=view!=='sgDiretoria';sgTextEditor.hidden=view!=='sgDiretoria';sgTitleLabel.hidden=view!=='sgDiretoria';
       render();
     });
 
