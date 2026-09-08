@@ -1,10 +1,75 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard Plano de Ação</title><link rel="stylesheet" href="css/style.css"></head><body>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard Plano de Ação</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 <div id="app">
-<aside id="editor" class="editor"><h1>Gerador de Relatório</h1><p class="muted">Edite os dados; o dashboard atualiza automaticamente.</p>
-<div class="tabs"><button data-view="mensal" class="active">Visão Geral</button><button data-view="consolidado">Consolidado</button></div>
-<label>Título<input id="titleInput"></label><label>Subtítulo<input id="subtitleInput"></label><label>Período<input id="periodInput"></label><label>Atualizado em<input id="dateInput" type="date"></label>
-<section id="monthlyEditor"><div class="section-head"><h2>Meses</h2><button id="addMonth">+ Adicionar</button></div><div id="monthEditors"></div></section>
-<section id="unitEditor" hidden><div class="section-head"><h2>Superintendências / Diretorias</h2><button id="addUnit">+ Adicionar</button></div><label>Ações totais do projeto<input id="projectTotal" type="number" min="0"></label><div id="unitEditors"></div></section>
-<div class="actions"><button id="presentation">Modo apresentação</button><button id="exportJson">Exportar dados</button><label class="filebtn">Importar dados<input id="importJson" type="file" accept="application/json" hidden></label><button id="reset">Restaurar exemplo</button></div></aside>
-<main class="stage"><section id="dashboard" class="dashboard"></section></main></div>
-<script src="js/calculations.js"></script><script src="js/charts.js"></script><script src="js/app.js"></script></body></html>
+  <aside id="editor" class="editor">
+    <h1>Gerador de Relatório</h1>
+    <p class="muted">Edite textos e dados; o dashboard atualiza automaticamente.</p>
+
+    <div class="tabs">
+      <button data-view="mensal" class="active">Visão Geral</button>
+      <button data-view="consolidado">Consolidado</button>
+    </div>
+
+    <section class="editor-block">
+      <div class="section-head"><h2>Cabeçalho</h2></div>
+      <label id="monthlyTitleLabel">Título — Visão Geral<input id="monthlyTitleInput"></label>
+      <label id="consolidatedTitleLabel" hidden>Título — Consolidado<input id="consolidatedTitleInput"></label>
+      <label>Subtítulo<input id="subtitleInput"></label>
+      <label>Período<input id="periodInput"></label>
+      <label>Atualizado em<input id="dateInput" type="date"></label>
+    </section>
+
+    <section id="monthlyTextEditor" class="editor-block">
+      <div class="section-head"><h2>Textos — Visão Geral</h2></div>
+      <label>Título da seção mensal<input id="monthlySectionTitleInput"></label>
+      <label>Título do card de execução<input id="executionCardTitleInput"></label>
+      <label>Legenda do total previsto<input id="plannedLabelInput"></label>
+      <label>Legenda do total realizado<input id="realizedLabelInput"></label>
+    </section>
+
+    <section id="consolidatedTextEditor" class="editor-block" hidden>
+      <div class="section-head"><h2>Textos — Consolidado</h2></div>
+      <label>Título da seção por responsável<input id="consolidatedSectionTitleInput"></label>
+      <label>Rótulo da visão geral<input id="overviewLabelInput"></label>
+      <label>Título do consolidado<input id="consolidatedHeadingInput"></label>
+    </section>
+
+    <details class="editor-block">
+      <summary>Categorias e siglas</summary>
+      <p class="muted">As cores permanecem padronizadas; nomes e siglas são editáveis.</p>
+      <div id="categoryEditors"></div>
+    </details>
+
+    <section id="monthlyEditor">
+      <div class="section-head"><h2>Meses</h2><button id="addMonth">+ Adicionar</button></div>
+      <div id="monthEditors"></div>
+    </section>
+
+    <section id="unitEditor" hidden>
+      <div class="section-head"><h2>Superintendências / Diretorias</h2><button id="addUnit">+ Adicionar</button></div>
+      <label>Ações totais do projeto<input id="projectTotal" type="number" min="0"></label>
+      <div id="unitEditors"></div>
+    </section>
+
+    <div class="actions">
+      <button id="presentation">Modo apresentação</button>
+      <button id="exportJson">Exportar dados</button>
+      <label class="filebtn">Importar dados<input id="importJson" type="file" accept="application/json" hidden></label>
+      <button id="reset">Restaurar exemplo</button>
+    </div>
+  </aside>
+
+  <main class="stage"><section id="dashboard" class="dashboard"></section></main>
+</div>
+<script src="js/calculations.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
