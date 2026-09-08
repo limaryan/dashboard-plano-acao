@@ -28,3 +28,9 @@ Aplicação web estática e editável para geração dos dashboards de acompanha
 Você pode substituir no repositório os arquivos `index.html`, `css/style.css`, `js/app.js`, `js/charts.js`, `js/calculations.js` e `README.md` pelos arquivos desta versão.
 
 Os dados da V2 são armazenados sob uma nova chave no navegador. Caso queira reaproveitar dados da V1, exporte o JSON antigo e importe-o pela V2; a aplicação faz a conversão automaticamente.
+
+
+## Novidades da versão 3
+- No Panorama Consolidado, **Ações previstas** e **Ações realizadas** são calculadas automaticamente pela soma das superintendências/diretorias.
+- **Ações totais do projeto** e **Realizadas até o período** são campos manuais e independentes do gráfico.
+- Meses com **0 ações previstas** mostram **N/A** e a mensagem **Sem ações previstas no mês**. Os percentuais só são calculados quando o total previsto do mês é maior que zero.

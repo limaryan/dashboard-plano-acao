@@ -14,6 +14,7 @@
     overviewLabel:'VISÃO GERAL',
     consolidatedHeading:'Execução consolidada de março a agosto',
     projectTotal:2316,
+    realizedUntilPeriod:1009,
     categories:{
       rl:{code:'RL',name:'Realizadas'},
       rp:{code:'RP',name:'Reprogramadas'},
@@ -65,6 +66,7 @@
     overviewLabelInput.value=state.overviewLabel;
     consolidatedHeadingInput.value=state.consolidatedHeading;
     projectTotal.value=state.projectTotal;
+    realizedUntilPeriod.value=state.realizedUntilPeriod;
 
     categoryEditors.innerHTML=['rl','rp','ca','pd'].map(k=>`<div class="category-entry" data-cat="${k}"><span class="swatch ${k}"></span><label>Sigla<input data-k="code" maxlength="8" value="${esc(cat(k).code)}"></label><label>Nome<input data-k="name" value="${esc(cat(k).name)}"></label></div>`).join('');
 
@@ -98,10 +100,9 @@
   }
 
   function consolidated(){
-    const planned=state.months.reduce((s,m)=>s+Calc.pv(m),0);
-    const real=Calc.sum(state.months,'rl');
+    const planned=Calc.sum(state.units,'planned');
+    const real=Calc.sum(state.units,'realized');
     const pct=Calc.pct(real,planned);
-    const unitReal=Calc.sum(state.units,'realized');
     return header(state.consolidatedTitle)+`<div class="content">
       <div class="card consolidated">
         <div><b>${esc(state.overviewLabel)}</b>${UI.donut(pct,'CONCLUSÃO')}</div>
@@ -109,7 +110,7 @@
           <div class="big-metric"><b>${planned.toLocaleString('pt-BR')}</b><p>ações previstas</p></div>
           <div class="big-metric green"><b>${real.toLocaleString('pt-BR')}</b><p>ações realizadas</p></div>
           <div class="big-metric"><b>${Number(state.projectTotal).toLocaleString('pt-BR')}</b><p>AÇÕES TOTAIS DO PROJETO</p></div>
-          <div class="big-metric green"><b>${unitReal.toLocaleString('pt-BR')}</b><p>REALIZADAS ATÉ O PERÍODO</p></div>
+          <div class="big-metric green"><b>${Number(state.realizedUntilPeriod).toLocaleString('pt-BR')}</b><p>REALIZADAS ATÉ O PERÍODO</p></div>
         </div></div>
       </div>
       <h2 class="section-title">${esc(state.consolidatedSectionTitle)}</h2>
@@ -135,6 +136,7 @@
     bindText('#consolidatedHeadingInput','consolidatedHeading');
 
     projectTotal.addEventListener('input',e=>{state.projectTotal=num(e.target.value);render()});
+    realizedUntilPeriod.addEventListener('input',e=>{state.realizedUntilPeriod=num(e.target.value);render()});
 
     categoryEditors.addEventListener('input',e=>{
       const box=e.target.closest('[data-cat]');if(!box)return;
