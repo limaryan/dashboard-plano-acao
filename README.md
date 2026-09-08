@@ -34,3 +34,11 @@ Os dados da V2 são armazenados sob uma nova chave no navegador. Caso queira rea
 - No Panorama Consolidado, **Ações previstas** e **Ações realizadas** são calculadas automaticamente pela soma das superintendências/diretorias.
 - **Ações totais do projeto** e **Realizadas até o período** são campos manuais e independentes do gráfico.
 - Meses com **0 ações previstas** mostram **N/A** e a mensagem **Sem ações previstas no mês**. Os percentuais só são calculados quando o total previsto do mês é maior que zero.
+
+
+## Novidades da V4
+- Removido o símbolo antes dos títulos dos dashboards.
+- Adicionado o terceiro dashboard **SG por Diretoria**.
+- O terceiro dashboard reutiliza os meses cadastrados e permite cadastrar diretorias com RL, RP, CA e PD.
+- Quando PV = 0, o indicador mostra **N/A / Sem ações previstas**, seguindo a mesma regra da evolução mensal.
+- Demais funcionalidades da V3 foram preservadas.

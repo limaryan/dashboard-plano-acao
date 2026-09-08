@@ -15,6 +15,7 @@
     <div class="tabs">
       <button data-view="mensal" class="active">Visão Geral</button>
       <button data-view="consolidado">Consolidado</button>
+      <button data-view="sg">SG por Diretoria</button>
     </div>
 
     <section class="editor-block">
@@ -52,12 +53,25 @@
       <div id="monthEditors"></div>
     </section>
 
+    <section id="sgTextEditor" class="editor-block" hidden>
+      <div class="section-head"><h2>Textos — SG por Diretoria</h2></div>
+      <label>Título do dashboard<input id="sgTitleInput"></label>
+      <label>Título da seção mensal<input id="sgMonthlySectionTitleInput"></label>
+      <label>Título da seção por diretoria<input id="sgDirectorSectionTitleInput"></label>
+    </section>
+
     <section id="unitEditor" hidden>
       <div class="section-head"><h2>Superintendências / Diretorias</h2><button id="addUnit">+ Adicionar</button></div>
       <label>Ações totais do projeto<input id="projectTotal" type="number" min="0"></label>
       <label>Realizadas até o período<input id="realizedUntilPeriod" type="number" min="0"></label>
       <p class="muted">Os dois campos acima são manuais. Ações previstas, ações realizadas e o percentual do consolidado são calculados automaticamente pela soma das superintendências/diretorias abaixo.</p>
       <div id="unitEditors"></div>
+    </section>
+
+    <section id="directorEditor" hidden>
+      <div class="section-head"><h2>Diretorias — SG</h2><button id="addDirector">+ Adicionar</button></div>
+      <p class="muted">Informe RL, RP, CA e PD de cada diretoria. PV e execução são calculados automaticamente.</p>
+      <div id="directorEditors"></div>
     </section>
 
     <div class="actions">

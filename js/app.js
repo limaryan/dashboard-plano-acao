@@ -13,6 +13,9 @@
     consolidatedSectionTitle:'CONCLUSÃO POR SUPERINTENDÊNCIA',
     overviewLabel:'VISÃO GERAL',
     consolidatedHeading:'Execução consolidada de março a agosto',
+    sgTitle:'SG — Acompanhamento do Plano de Ação',
+    sgMonthlySectionTitle:'EVOLUÇÃO MENSAL — SG',
+    sgDirectorSectionTitle:'EXECUÇÃO POR DIRETORIA',
     projectTotal:2316,
     realizedUntilPeriod:1009,
     categories:{
@@ -22,7 +25,8 @@
       pd:{code:'PD',name:'Pendentes'}
     },
     months:[['Março',103,14,0,37],['Abril',207,50,0,16],['Maio',244,105,106,15],['Junho',158,200,0,34],['Julho',125,153,10,47],['Agosto',98,96,0,59]].map(x=>({name:x[0],rl:x[1],rp:x[2],ca:x[3],pd:x[4]})),
-    units:[['SG',74,36],['SAF',291,224],['SAS',1194,621],['SO',300,45],['SEPI',19,9]].map(x=>({name:x[0],planned:x[1],realized:x[2]}))
+    units:[['SG',74,36],['SAF',291,224],['SAS',1194,621],['SO',300,45],['SEPI',19,9]].map(x=>({name:x[0],planned:x[1],realized:x[2]})),
+    directors:[['Renata',0,0,0,0],['Afra',0,0,0,0],['Felipe',0,0,0,0],['Paulo',0,0,0,0]].map(x=>({name:x[0],rl:x[1],rp:x[2],ca:x[3],pd:x[4]}))
   };
 
   const clone=o=>JSON.parse(JSON.stringify(o));
@@ -32,11 +36,12 @@
 
   function normalize(raw={}){
     const s=clone(seed);
-    Object.keys(s).forEach(k=>{if(raw[k]!==undefined && !['categories','months','units'].includes(k))s[k]=raw[k]});
+    Object.keys(s).forEach(k=>{if(raw[k]!==undefined && !['categories','months','units','directors'].includes(k))s[k]=raw[k]});
     // Compatibilidade com JSON da versão 1
     if(raw.title && !raw.monthlyTitle)s.monthlyTitle=raw.title;
     if(Array.isArray(raw.months))s.months=raw.months.map(m=>({name:m.name||'Novo mês',rl:num(m.rl),rp:num(m.rp),ca:num(m.ca),pd:num(m.pd)}));
     if(Array.isArray(raw.units))s.units=raw.units.map(u=>({name:u.name||'Nova unidade',planned:num(u.planned),realized:num(u.realized)}));
+    if(Array.isArray(raw.directors))s.directors=raw.directors.map(d=>({name:d.name||'Nova diretoria',rl:num(d.rl),rp:num(d.rp),ca:num(d.ca),pd:num(d.pd)}));
     if(raw.categories){
       for(const k of ['rl','rp','ca','pd'])if(raw.categories[k])s.categories[k]={...s.categories[k],...raw.categories[k]};
     }
@@ -65,6 +70,9 @@
     consolidatedSectionTitleInput.value=state.consolidatedSectionTitle;
     overviewLabelInput.value=state.overviewLabel;
     consolidatedHeadingInput.value=state.consolidatedHeading;
+    sgTitleInput.value=state.sgTitle;
+    sgMonthlySectionTitleInput.value=state.sgMonthlySectionTitle;
+    sgDirectorSectionTitleInput.value=state.sgDirectorSectionTitle;
     projectTotal.value=state.projectTotal;
     realizedUntilPeriod.value=state.realizedUntilPeriod;
 
@@ -72,11 +80,13 @@
 
     monthEditors.innerHTML=state.months.map((m,i)=>`<div class="entry" data-mi="${i}"><div class="entry-top"><input data-k="name" value="${esc(m.name)}"><button class="delete" data-del-month="${i}">Excluir</button></div><div class="grid-inputs">${['rl','rp','ca','pd'].map(k=>`<label>${esc(cat(k).code)}<input type="number" min="0" data-k="${k}" value="${m[k]}"></label>`).join('')}</div></div>`).join('');
 
+    directorEditors.innerHTML=state.directors.map((d,i)=>`<div class="entry" data-di="${i}"><div class="entry-top"><input data-k="name" value="${esc(d.name)}"><button class="delete" data-del-director="${i}">Excluir</button></div><div class="grid-inputs">${['rl','rp','ca','pd'].map(k=>`<label>${esc(cat(k).code)}<input type="number" min="0" data-k="${k}" value="${d[k]}"></label>`).join('')}</div></div>`).join('');
+
     unitEditors.innerHTML=state.units.map((u,i)=>`<div class="entry" data-ui="${i}"><div class="entry-top"><input data-k="name" value="${esc(u.name)}"><button class="delete" data-del-unit="${i}">Excluir</button></div><div class="grid-inputs"><label>Previstas<input type="number" min="0" data-k="planned" value="${u.planned}"></label><label>Realizadas<input type="number" min="0" data-k="realized" value="${u.realized}"></label></div></div>`).join('');
   }
 
   function header(title){
-    return `<header class="hero"><div><h1>◎ ${esc(title)}</h1><p>${esc(state.subtitle)}</p></div><div class="hero-right"><b>${esc(state.period)}</b><p>Atualizado em ${dateBR(state.date)}</p></div></header>`;
+    return `<header class="hero"><div><h1>${esc(title)}</h1><p>${esc(state.subtitle)}</p></div><div class="hero-right"><b>${esc(state.period)}</b><p>Atualizado em ${dateBR(state.date)}</p></div></header>`;
   }
 
   function monthly(){
@@ -118,7 +128,22 @@
     </div>`;
   }
 
-  function render(){dashboard.innerHTML=view==='mensal'?monthly():consolidated();save()}
+  function sgDashboard(){
+    return header(state.sgTitle)+`<div class="content">
+      <h2 class="section-title">${esc(state.sgMonthlySectionTitle)}</h2>
+      <div class="months sg-months">${state.months.map(m=>{
+        const pv=Calc.pv(m);
+        return `<div class="card month-card"><h3>${esc(m.name).toUpperCase()}</h3>${UI.statusDonut(m)}<div class="rows">${['rl','rp','ca','pd'].map(k=>UI.row(k,esc(cat(k).code),m[k],pv)).join('')}</div><div class="total"><span>TOTAL PREVISTO</span><span>${pv.toLocaleString('pt-BR')}</span></div></div>`
+      }).join('')}</div>
+      <h2 class="section-title">${esc(state.sgDirectorSectionTitle)}</h2>
+      <div class="directors">${state.directors.map(d=>{
+        const pv=Calc.pv(d), pct=pv>0?Calc.pct(d.rl,pv):null;
+        return `<div class="card director-card"><h2>${esc(d.name)}</h2>${UI.donut(pct,'EXECUÇÃO')}<div class="rows">${['rl','rp','ca','pd'].map(k=>UI.row(k,esc(cat(k).code),d[k],pv)).join('')}</div><div class="total"><span>TOTAL PREVISTO</span><span>${pv.toLocaleString('pt-BR')}</span></div></div>`
+      }).join('')}</div>
+    </div>`;
+  }
+
+  function render(){dashboard.innerHTML=view==='mensal'?monthly():view==='consolidado'?consolidated():sgDashboard();save()}
 
   function bindText(id,key){$(id).addEventListener('input',e=>{state[key]=e.target.value;render()})}
   function bind(){
@@ -134,6 +159,9 @@
     bindText('#consolidatedSectionTitleInput','consolidatedSectionTitle');
     bindText('#overviewLabelInput','overviewLabel');
     bindText('#consolidatedHeadingInput','consolidatedHeading');
+    bindText('#sgTitleInput','sgTitle');
+    bindText('#sgMonthlySectionTitleInput','sgMonthlySectionTitle');
+    bindText('#sgDirectorSectionTitleInput','sgDirectorSectionTitle');
 
     projectTotal.addEventListener('input',e=>{state.projectTotal=num(e.target.value);render()});
     realizedUntilPeriod.addEventListener('input',e=>{state.realizedUntilPeriod=num(e.target.value);render()});
@@ -147,26 +175,30 @@
     });
 
     monthEditors.addEventListener('input',e=>{const box=e.target.closest('[data-mi]');if(!box)return;const k=e.target.dataset.k,i=+box.dataset.mi;state.months[i][k]=k==='name'?e.target.value:num(e.target.value);render()});
+    directorEditors.addEventListener('input',e=>{const box=e.target.closest('[data-di]');if(!box)return;const k=e.target.dataset.k,i=+box.dataset.di;state.directors[i][k]=k==='name'?e.target.value:num(e.target.value);render()});
     unitEditors.addEventListener('input',e=>{const box=e.target.closest('[data-ui]');if(!box)return;const k=e.target.dataset.k,i=+box.dataset.ui;state.units[i][k]=k==='name'?e.target.value:num(e.target.value);render()});
 
     document.addEventListener('click',e=>{
       if(e.target.dataset.delMonth!==undefined){state.months.splice(+e.target.dataset.delMonth,1);renderEditors();render()}
       if(e.target.dataset.delUnit!==undefined){state.units.splice(+e.target.dataset.delUnit,1);renderEditors();render()}
+      if(e.target.dataset.delDirector!==undefined){state.directors.splice(+e.target.dataset.delDirector,1);renderEditors();render()}
     });
 
     addMonth.onclick=()=>{state.months.push({name:'Novo mês',rl:0,rp:0,ca:0,pd:0});renderEditors();render()};
     addUnit.onclick=()=>{state.units.push({name:'Nova unidade',planned:0,realized:0});renderEditors();render()};
+    addDirector.onclick=()=>{state.directors.push({name:'Nova diretoria',rl:0,rp:0,ca:0,pd:0});renderEditors();render()};
 
     document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{
       view=b.dataset.view;
       document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===b));
-      monthlyEditor.hidden=view!=='mensal';monthlyTextEditor.hidden=view!=='mensal';monthlyTitleLabel.hidden=view!=='mensal';
+      monthlyEditor.hidden=!(view==='mensal'||view==='sg');monthlyTextEditor.hidden=view!=='mensal';monthlyTitleLabel.hidden=view!=='mensal';
       unitEditor.hidden=view!=='consolidado';consolidatedTextEditor.hidden=view!=='consolidado';consolidatedTitleLabel.hidden=view!=='consolidado';
+      sgTextEditor.hidden=view!=='sg';directorEditor.hidden=view!=='sg';
       render();
     });
 
     presentation.onclick=()=>{document.body.classList.add('presentation');const b=document.createElement('button');b.className='presentation-exit';b.textContent='Sair da apresentação';b.onclick=()=>{document.body.classList.remove('presentation');b.remove()};document.body.appendChild(b)};
-    exportJson.onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dados-dashboard-v2.json';a.click();URL.revokeObjectURL(a.href)};
+    exportJson.onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dados-dashboard-v4.json';a.click();URL.revokeObjectURL(a.href)};
     importJson.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=normalize(JSON.parse(r.result));renderEditors();render()}catch{alert('Arquivo JSON inválido.')}};r.readAsText(f)};
     reset.onclick=()=>{if(confirm('Restaurar os dados de exemplo?')){state=clone(seed);renderEditors();render()}};
   }
