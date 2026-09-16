@@ -2,14 +2,16 @@
 
 Aplicação web estática para GitHub Pages, sem banco de dados e sem custos de hospedagem além do próprio domínio, se houver.
 
-## Novidades da V5
+## Novidades da V5.1
 
 - Novo dashboard **Ações com Custo**.
 - Campo manual **Ações totais do plano**.
-- **Ações com custo** calculadas automaticamente pela soma das superintendências.
-- **Concluídas com custo** calculadas automaticamente pela soma das superintendências.
+- **Ações com custo** informadas manualmente no resumo geral.
+- **Concluídas com custo** informadas manualmente no resumo geral.
 - Percentual geral e por superintendência calculado automaticamente.
-- Quando não houver ações com custo, o indicador mostra **N/A**.
+- Quando não houver ações com custo, o indicador mostra **N/A / Sem ações com custo**.
+- Superintendências são apenas detalhamento e não alimentam o total geral, evitando dupla contagem de ações compartilhadas.
+- Removidas as legendas auxiliares abaixo dos três cards superiores de custo.
 - Todos os valores numéricos iniciais começam em **0**.
 - Botão **Zerar valores** preserva nomes, meses, diretorias, superintendências e textos.
 - Barra lateral pode ser recolhida e possui scroll independente do dashboard.

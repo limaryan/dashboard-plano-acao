@@ -1,5 +1,5 @@
 (()=>{
-  const KEY='planoAcaoDashboardV5';
+  const KEY='planoAcaoDashboardV51';
   const monthNames=['Março','Abril','Maio','Junho','Julho','Agosto'];
   const emptyMonths=()=>monthNames.map(name=>({name,rl:0,rp:0,ca:0,pd:0}));
   const seed={
@@ -8,7 +8,7 @@
     monthlySectionTitle:'EVOLUÇÃO MENSAL', executionCardTitle:'EXECUÇÃO DO PLANO', plannedLabel:'AÇÕES PREVISTAS', realizedLabel:'AÇÕES REALIZADAS',
     consolidatedSectionTitle:'CONCLUSÃO POR SUPERINTENDÊNCIA', overviewLabel:'VISÃO GERAL', consolidatedHeading:'Execução consolidada do período',
     costSectionTitle:'AÇÕES COM CUSTO POR SUPERINTENDÊNCIA',
-    projectTotal:0, realizedUntilPeriod:0, costProjectTotal:0,
+    projectTotal:0, realizedUntilPeriod:0, costProjectTotal:0, costTotal:0, costCompleted:0,
     categories:{rl:{code:'RL',name:'Realizadas'},rp:{code:'RP',name:'Reprogramadas'},ca:{code:'CA',name:'Canceladas'},pd:{code:'PD',name:'Pendentes'}},
     months:emptyMonths(),
     units:['SG','SAF','SAS','SO','SEPI'].map(name=>({name,planned:0,realized:0})),
@@ -30,9 +30,11 @@
     if(Array.isArray(raw.directors))s.directors=raw.directors.map(d=>({name:d.name||'Nova diretoria',months:baseNames.map((name,i)=>{const old=(d.months||[])[i]||{};return {name,rl:num(old.rl),rp:num(old.rp),ca:num(old.ca),pd:num(old.pd)}})}));
     else s.directors=seed.directors.map(d=>({name:d.name,months:baseNames.map(name=>({name,rl:0,rp:0,ca:0,pd:0}))}));
     if(Array.isArray(raw.costUnits))s.costUnits=raw.costUnits.map(u=>({name:u.name||'Nova superintendência',costActions:num(u.costActions),completed:num(u.completed)}));
+    if(raw.costTotal===undefined && Array.isArray(raw.costUnits))s.costTotal=Calc.sum(s.costUnits,'costActions');
+    if(raw.costCompleted===undefined && Array.isArray(raw.costUnits))s.costCompleted=Calc.sum(s.costUnits,'completed');
     return s;
   }
-  let state; try{const saved=localStorage.getItem(KEY)||localStorage.getItem('planoAcaoDashboardV2');state=normalize(JSON.parse(saved)||{})}catch{state=clone(seed)}
+  let state; try{const saved=localStorage.getItem(KEY)||localStorage.getItem('planoAcaoDashboardV5')||localStorage.getItem('planoAcaoDashboardV2');state=normalize(JSON.parse(saved)||{})}catch{state=clone(seed)}
   let view='mensal';
   function save(){localStorage.setItem(KEY,JSON.stringify(state))}
   function dateBR(v){if(!v)return'';const[y,m,d]=v.split('-');return y&&m&&d?`${d}/${m}/${y}`:v}
@@ -45,7 +47,7 @@
     subtitleInput.value=state.subtitle; periodInput.value=state.period; dateInput.value=state.date;
     monthlySectionTitleInput.value=state.monthlySectionTitle; executionCardTitleInput.value=state.executionCardTitle; plannedLabelInput.value=state.plannedLabel; realizedLabelInput.value=state.realizedLabel;
     consolidatedSectionTitleInput.value=state.consolidatedSectionTitle; overviewLabelInput.value=state.overviewLabel; consolidatedHeadingInput.value=state.consolidatedHeading;
-    costSectionTitleInput.value=state.costSectionTitle; projectTotal.value=state.projectTotal; realizedUntilPeriod.value=state.realizedUntilPeriod; costProjectTotal.value=state.costProjectTotal;
+    costSectionTitleInput.value=state.costSectionTitle; projectTotal.value=state.projectTotal; realizedUntilPeriod.value=state.realizedUntilPeriod; costProjectTotal.value=state.costProjectTotal; costTotal.value=state.costTotal; costCompleted.value=state.costCompleted;
     categoryEditors.innerHTML=['rl','rp','ca','pd'].map(k=>`<div class="category-entry" data-cat="${k}"><span class="swatch ${k}"></span><label>Sigla<input data-k="code" maxlength="8" value="${esc(cat(k).code)}"></label><label>Nome<input data-k="name" value="${esc(cat(k).name)}"></label></div>`).join('');
     monthEditors.innerHTML=state.months.map((m,i)=>`<div class="entry" data-mi="${i}"><div class="entry-top"><input data-k="name" value="${esc(m.name)}"><button class="delete" data-del-month="${i}" type="button">Excluir</button></div><div class="grid-inputs">${['rl','rp','ca','pd'].map(k=>`<label>${esc(cat(k).code)}<input type="number" min="0" data-k="${k}" value="${m[k]}"></label>`).join('')}</div></div>`).join('');
     unitEditors.innerHTML=state.units.map((u,i)=>`<div class="entry" data-ui="${i}"><div class="entry-top"><input data-k="name" value="${esc(u.name)}"><button class="delete" data-del-unit="${i}" type="button">Excluir</button></div><div class="grid-inputs"><label>Previstas<input type="number" min="0" data-k="planned" value="${u.planned}"></label><label>Realizadas<input type="number" min="0" data-k="realized" value="${u.realized}"></label></div></div>`).join('');
@@ -66,8 +68,8 @@
   function sgMonthCard(m,small=false){const pv=Calc.pv(m);return `<div class="card ${small?'sg-mini-month':'sg-main-month'}"><h3>${esc(m.name).toUpperCase()}</h3>${UI.statusDonut(m)}<div class="rows">${['rl','rp','ca','pd'].map(k=>UI.row(k,esc(cat(k).code),m[k],pv)).join('')}</div><div class="total"><span>PV</span><span>${pv.toLocaleString('pt-BR')}</span></div></div>`}
   function sgDiretoria(){return header('SG — ACOMPANHAMENTO DO PLANO DE AÇÃO')+`<div class="content sg-content"><h2 class="section-title sg-general-title">SG GERAL — EVOLUÇÃO MENSAL</h2><div class="sg-general-months">${state.months.map(m=>sgMonthCard(m,false)).join('')}</div><h2 class="section-title sg-directors-title">ESTRATIFICADO POR DIRETORIA</h2><div class="director-sections">${state.directors.map(d=>`<section class="card director-section"><h2>${esc(d.name).toUpperCase()}</h2><div class="director-months">${d.months.map(m=>sgMonthCard(m,true)).join('')}</div></section>`).join('')}</div></div>`}
   function costDashboard(){
-    const totalCost=Calc.sum(state.costUnits,'costActions'), completed=Calc.sum(state.costUnits,'completed'), pct=totalCost?Calc.pct(completed,totalCost):null;
-    return header(state.costTitle)+`<div class="content"><div class="cost-summary"><div class="card cost-kpi"><span>AÇÕES TOTAIS DO PLANO</span><b>${Number(state.costProjectTotal).toLocaleString('pt-BR')}</b><small>valor manual</small></div><div class="card cost-kpi"><span>AÇÕES COM CUSTO</span><b>${totalCost.toLocaleString('pt-BR')}</b><small>soma das superintendências</small></div><div class="card cost-kpi green"><span>CONCLUÍDAS COM CUSTO</span><b>${completed.toLocaleString('pt-BR')}</b><small>soma das superintendências</small></div><div class="card cost-donut-card"><span>EXECUÇÃO DAS AÇÕES COM CUSTO</span>${UI.donut(pct,'CONCLUSÃO','SEM AÇÕES COM CUSTO')}</div></div><h2 class="section-title">${esc(state.costSectionTitle)}</h2><div class="cost-units">${state.costUnits.map(u=>{const p=u.costActions?Calc.pct(u.completed,u.costActions):null;return `<div class="card cost-unit-card"><h2>${esc(u.name)}</h2>${UI.donut(p,'CONCLUSÃO','SEM AÇÕES COM CUSTO')}<div class="cost-pair"><div><b>${Number(u.costActions).toLocaleString('pt-BR')}</b><span>Ações com custo</span></div><div class="green"><b>${Number(u.completed).toLocaleString('pt-BR')}</b><span>Concluídas</span></div></div></div>`}).join('')}</div></div>`
+    const totalCost=num(state.costTotal), completed=num(state.costCompleted), pct=totalCost?Calc.pct(completed,totalCost):null;
+    return header(state.costTitle)+`<div class="content"><div class="cost-summary"><div class="card cost-kpi"><span>AÇÕES TOTAIS DO PLANO</span><b>${Number(state.costProjectTotal).toLocaleString('pt-BR')}</b></div><div class="card cost-kpi"><span>AÇÕES COM CUSTO</span><b>${totalCost.toLocaleString('pt-BR')}</b></div><div class="card cost-kpi green"><span>CONCLUÍDAS COM CUSTO</span><b>${completed.toLocaleString('pt-BR')}</b></div><div class="card cost-donut-card"><span>EXECUÇÃO DAS AÇÕES COM CUSTO</span>${UI.donut(pct,'CONCLUSÃO','SEM AÇÕES COM CUSTO')}</div></div><h2 class="section-title">${esc(state.costSectionTitle)}</h2><div class="cost-units">${state.costUnits.map(u=>{const p=u.costActions?Calc.pct(u.completed,u.costActions):null;return `<div class="card cost-unit-card"><h2>${esc(u.name)}</h2>${UI.donut(p,'CONCLUSÃO','SEM AÇÕES COM CUSTO')}<div class="cost-pair"><div><b>${Number(u.costActions).toLocaleString('pt-BR')}</b><span>Ações com custo</span></div><div class="green"><b>${Number(u.completed).toLocaleString('pt-BR')}</b><span>Concluídas</span></div></div></div>`}).join('')}</div></div>`
   }
 
   function render(){dashboard.innerHTML=view==='mensal'?monthly():view==='consolidado'?consolidated():view==='sgdiretoria'?sgDiretoria():costDashboard();save()}
@@ -78,7 +80,7 @@
     const wb=XLSX.utils.book_new();
     const addSheet=(name,rows,widths)=>{const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=widths.map(w=>({wch:w}));if(rows.length>1)ws['!autofilter']={ref:`A1:${XLSX.utils.encode_col(rows[0].length-1)}${rows.length}`};XLSX.utils.book_append_sheet(wb,ws,name)};
     addSheet('Resumo',[
-      ['Indicador','Valor'],['Período',state.period],['Atualizado em',dateBR(state.date)],['Ações totais do projeto',state.projectTotal],['Realizadas até o período',state.realizedUntilPeriod],['Ações totais do plano - custo',state.costProjectTotal],['Ações com custo',Calc.sum(state.costUnits,'costActions')],['Concluídas com custo',Calc.sum(state.costUnits,'completed')]
+      ['Indicador','Valor'],['Período',state.period],['Atualizado em',dateBR(state.date)],['Ações totais do projeto',state.projectTotal],['Realizadas até o período',state.realizedUntilPeriod],['Ações totais do plano - custo',state.costProjectTotal],['Ações com custo',state.costTotal],['Concluídas com custo',state.costCompleted]
     ],[32,20]);
     addSheet('Visao Geral',[['Mês','PV','RL','RP','CA','PD','Execução %'],...state.months.map(m=>{const pv=Calc.pv(m);return [m.name,pv,m.rl,m.rp,m.ca,m.pd,pv?Calc.pct(m.rl,pv):'N/A']})],[18,10,10,10,10,10,12]);
     addSheet('Consolidado',[['Superintendência / Diretoria','Previstas','Realizadas','Conclusão %'],...state.units.map(u=>[u.name,u.planned,u.realized,u.planned?Calc.pct(u.realized,u.planned):'N/A'])],[28,14,14,14]);
@@ -88,7 +90,7 @@
   }
 
   function zeroValues(){
-    state.projectTotal=0; state.realizedUntilPeriod=0; state.costProjectTotal=0;
+    state.projectTotal=0; state.realizedUntilPeriod=0; state.costProjectTotal=0; state.costTotal=0; state.costCompleted=0;
     state.months.forEach(m=>{m.rl=m.rp=m.ca=m.pd=0});
     state.units.forEach(u=>{u.planned=u.realized=0});
     state.directors.forEach(d=>d.months.forEach(m=>{m.rl=m.rp=m.ca=m.pd=0}));
@@ -97,7 +99,7 @@
 
   function bind(){
     bindText('#monthlyTitleInput','monthlyTitle');bindText('#consolidatedTitleInput','consolidatedTitle');bindText('#costTitleInput','costTitle');bindText('#subtitleInput','subtitle');bindText('#periodInput','period');bindText('#dateInput','date');bindText('#monthlySectionTitleInput','monthlySectionTitle');bindText('#executionCardTitleInput','executionCardTitle');bindText('#plannedLabelInput','plannedLabel');bindText('#realizedLabelInput','realizedLabel');bindText('#consolidatedSectionTitleInput','consolidatedSectionTitle');bindText('#overviewLabelInput','overviewLabel');bindText('#consolidatedHeadingInput','consolidatedHeading');bindText('#costSectionTitleInput','costSectionTitle');
-    projectTotal.addEventListener('input',e=>{state.projectTotal=num(e.target.value);render()});realizedUntilPeriod.addEventListener('input',e=>{state.realizedUntilPeriod=num(e.target.value);render()});costProjectTotal.addEventListener('input',e=>{state.costProjectTotal=num(e.target.value);render()});
+    projectTotal.addEventListener('input',e=>{state.projectTotal=num(e.target.value);render()});realizedUntilPeriod.addEventListener('input',e=>{state.realizedUntilPeriod=num(e.target.value);render()});costProjectTotal.addEventListener('input',e=>{state.costProjectTotal=num(e.target.value);render()});costTotal.addEventListener('input',e=>{state.costTotal=num(e.target.value);render()});costCompleted.addEventListener('input',e=>{state.costCompleted=num(e.target.value);render()});
     categoryEditors.addEventListener('input',e=>{const box=e.target.closest('[data-cat]');if(!box)return;const k=box.dataset.cat,field=e.target.dataset.k;if(!field)return;state.categories[k][field]=e.target.value;renderEditors();render()});
     monthEditors.addEventListener('input',e=>{const box=e.target.closest('[data-mi]');if(!box)return;const k=e.target.dataset.k,i=+box.dataset.mi;state.months[i][k]=k==='name'?e.target.value:num(e.target.value);if(k==='name')syncDirectorMonths();render()});
     unitEditors.addEventListener('input',e=>{const box=e.target.closest('[data-ui]');if(!box)return;const k=e.target.dataset.k,i=+box.dataset.ui;state.units[i][k]=k==='name'?e.target.value:num(e.target.value);render()});
@@ -124,7 +126,7 @@
     });
     presentation.onclick=()=>{document.body.classList.add('presentation');const b=document.createElement('button');b.className='presentation-exit';b.textContent='Sair da apresentação';b.onclick=()=>{document.body.classList.remove('presentation');b.remove()};document.body.appendChild(b)};
     exportExcel.onclick=exportExcelFile;
-    exportJson.onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dados-dashboard-v5.json';a.click();URL.revokeObjectURL(a.href)};
+    exportJson.onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dados-dashboard-v5-1.json';a.click();URL.revokeObjectURL(a.href)};
     importJson.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=normalize(JSON.parse(r.result));renderEditors();render()}catch{alert('Arquivo JSON inválido.')}};r.readAsText(f)};
     reset.onclick=()=>{if(confirm('Zerar todos os valores numéricos? Meses, nomes, diretorias, superintendências e textos serão mantidos.')){zeroValues();renderEditors();render()}};
     const setSidebar=collapsed=>document.body.classList.toggle('sidebar-collapsed',collapsed);

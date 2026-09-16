@@ -53,7 +53,9 @@
       <div class="section-head"><h2>Textos — Ações com Custo</h2></div>
       <label>Título da seção por superintendência<input id="costSectionTitleInput"></label>
       <label>Ações totais do plano<input id="costProjectTotal" type="number" min="0"></label>
-      <p class="muted">Este valor é manual. Ações com custo e concluídas são calculadas automaticamente pela soma das superintendências.</p>
+      <label>Ações com custo<input id="costTotal" type="number" min="0"></label>
+      <label>Concluídas com custo<input id="costCompleted" type="number" min="0"></label>
+      <p class="muted">Os três valores do resumo são informados manualmente. As superintendências abaixo são exibidas como detalhamento e não são somadas no total geral.</p>
     </section>
 
     <details class="editor-block">
@@ -83,7 +85,7 @@
 
     <section id="costEditor" hidden>
       <div class="section-head"><h2>Superintendências — Ações com Custo</h2><button id="addCostUnit" type="button">+ Adicionar</button></div>
-      <p class="muted">Informe, em cada superintendência, quantas ações possuem custo e quantas foram concluídas. O total geral é calculado automaticamente.</p>
+      <p class="muted">Informe, em cada superintendência, quantas ações possuem custo e quantas foram concluídas. Os valores por superintendência são independentes do total geral para evitar dupla contagem em ações compartilhadas.</p>
       <div id="costUnitEditors"></div>
     </section>
 
