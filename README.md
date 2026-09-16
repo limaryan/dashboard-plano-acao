@@ -2,7 +2,7 @@
 
 Aplicação web estática para GitHub Pages, sem banco de dados e sem custos de hospedagem além do próprio domínio, se houver.
 
-## Novidades da V5.1
+## Novidades da V5.2
 
 - Novo dashboard **Ações com Custo**.
 - Campo manual **Ações totais do plano**.
@@ -33,3 +33,7 @@ Suba o conteúdo desta pasta para a raiz do mesmo repositório usado anteriormen
 ## Observação sobre Excel
 
 A exportação `.xlsx` usa a biblioteca SheetJS Community Edition carregada pelo navegador através de CDN. Portanto, o usuário precisa estar conectado à internet no momento da exportação.
+
+
+## Correção V5.2
+- Indicadores de ações com custo agora exibem **N/A — Sem ações com custo** quando o total de ações com custo é 0, inclusive nos cards por superintendência.
