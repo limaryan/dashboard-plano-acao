@@ -9,19 +9,26 @@
 <body>
 <div id="app">
   <aside id="editor" class="editor">
-    <h1>Gerador de Relatório</h1>
-    <p class="muted">Edite textos e dados; o dashboard atualiza automaticamente.</p>
+    <div class="editor-topbar">
+      <div>
+        <h1>Gerador de Relatório</h1>
+        <p class="muted">Edite textos e dados; o dashboard atualiza automaticamente.</p>
+      </div>
+      <button id="collapseSidebar" class="icon-btn" type="button" title="Recolher barra lateral" aria-label="Recolher barra lateral">☰</button>
+    </div>
 
     <div class="tabs">
       <button data-view="mensal" class="active">Visão Geral</button>
       <button data-view="consolidado">Consolidado</button>
       <button data-view="sgdiretoria">SG por Diretoria</button>
+      <button data-view="custos">Ações com Custo</button>
     </div>
 
     <section class="editor-block">
       <div class="section-head"><h2>Cabeçalho</h2></div>
       <label id="monthlyTitleLabel">Título — Visão Geral<input id="monthlyTitleInput"></label>
       <label id="consolidatedTitleLabel" hidden>Título — Consolidado<input id="consolidatedTitleInput"></label>
+      <label id="costTitleLabel" hidden>Título — Ações com Custo<input id="costTitleInput"></label>
       <label>Subtítulo<input id="subtitleInput"></label>
       <label>Período<input id="periodInput"></label>
       <label>Atualizado em<input id="dateInput" type="date"></label>
@@ -42,6 +49,13 @@
       <label>Título do consolidado<input id="consolidatedHeadingInput"></label>
     </section>
 
+    <section id="costTextEditor" class="editor-block" hidden>
+      <div class="section-head"><h2>Textos — Ações com Custo</h2></div>
+      <label>Título da seção por superintendência<input id="costSectionTitleInput"></label>
+      <label>Ações totais do plano<input id="costProjectTotal" type="number" min="0"></label>
+      <p class="muted">Este valor é manual. Ações com custo e concluídas são calculadas automaticamente pela soma das superintendências.</p>
+    </section>
+
     <details class="editor-block">
       <summary>Categorias e siglas</summary>
       <p class="muted">As cores permanecem padronizadas; nomes e siglas são editáveis.</p>
@@ -49,34 +63,45 @@
     </details>
 
     <section id="monthlyEditor">
-      <div class="section-head"><h2>Meses</h2><button id="addMonth">+ Adicionar</button></div>
+      <div class="section-head"><h2>Meses</h2><button id="addMonth" type="button">+ Adicionar</button></div>
       <div id="monthEditors"></div>
     </section>
 
     <section id="directorEditor" hidden>
-      <div class="section-head"><h2>Diretorias — SG</h2><button id="addDirector">+ Adicionar</button></div>
+      <div class="section-head"><h2>Diretorias — SG</h2><button id="addDirector" type="button">+ Adicionar</button></div>
       <p class="muted">Cada diretoria possui sua própria evolução mensal. Os nomes são editáveis e novas diretorias podem ser adicionadas quando necessário.</p>
       <div id="directorEditors"></div>
     </section>
 
     <section id="unitEditor" hidden>
-      <div class="section-head"><h2>Superintendências / Diretorias</h2><button id="addUnit">+ Adicionar</button></div>
+      <div class="section-head"><h2>Superintendências / Diretorias</h2><button id="addUnit" type="button">+ Adicionar</button></div>
       <label>Ações totais do projeto<input id="projectTotal" type="number" min="0"></label>
       <label>Realizadas até o período<input id="realizedUntilPeriod" type="number" min="0"></label>
       <p class="muted">Os dois campos acima são manuais. Ações previstas, ações realizadas e o percentual do consolidado são calculados automaticamente pela soma das superintendências/diretorias abaixo.</p>
       <div id="unitEditors"></div>
     </section>
 
+    <section id="costEditor" hidden>
+      <div class="section-head"><h2>Superintendências — Ações com Custo</h2><button id="addCostUnit" type="button">+ Adicionar</button></div>
+      <p class="muted">Informe, em cada superintendência, quantas ações possuem custo e quantas foram concluídas. O total geral é calculado automaticamente.</p>
+      <div id="costUnitEditors"></div>
+    </section>
+
     <div class="actions">
-      <button id="presentation">Modo apresentação</button>
-      <button id="exportJson">Exportar dados</button>
-      <label class="filebtn">Importar dados<input id="importJson" type="file" accept="application/json" hidden></label>
-      <button id="reset">Restaurar exemplo</button>
+      <button id="presentation" type="button">Modo apresentação</button>
+      <button id="exportExcel" type="button">Baixar Excel</button>
+      <button id="exportJson" type="button">Exportar backup</button>
+      <label class="filebtn">Importar backup<input id="importJson" type="file" accept="application/json" hidden></label>
+      <button id="reset" type="button">Zerar valores</button>
     </div>
   </aside>
 
-  <main class="stage"><section id="dashboard" class="dashboard"></section></main>
+  <main class="stage">
+    <button id="openSidebar" class="sidebar-open" type="button" title="Abrir barra lateral" aria-label="Abrir barra lateral">☰</button>
+    <section id="dashboard" class="dashboard"></section>
+  </main>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="js/calculations.js"></script>
 <script src="js/charts.js"></script>
 <script src="js/app.js"></script>

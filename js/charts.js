@@ -1,8 +1,8 @@
 window.UI={
-  donut:(pct,label='EXECUÇÃO')=>{
+  donut:(pct,label='EXECUÇÃO',naLabel='SEM AÇÕES PREVISTAS')=>{
     const valid=Number.isFinite(Number(pct));
     const p=valid?Math.max(0,Math.min(100,Number(pct))):0;
-    return `<div class="donut${valid?'':' na'}" style="--p:${p}"><div class="donut-center"><b>${valid?Math.round(p)+'%':'N/A'}</b><span>${valid?label:'SEM AÇÕES PREVISTAS'}</span></div></div>`;
+    return `<div class="donut${valid?'':' na'}" style="--p:${p}"><div class="donut-center"><b>${valid?Math.round(p)+'%':'N/A'}</b><span>${valid?label:naLabel}</span></div></div>`;
   },
   statusDonut:(m,label='EXECUÇÃO')=>{
     const total=window.Calc.pv(m);
