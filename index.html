@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Dashboard Plano de Ação</title>
+  <title>Dashboard Plano de Ação — V6</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -22,6 +22,7 @@
       <button data-view="consolidado">Consolidado</button>
       <button data-view="sgdiretoria">SG por Diretoria</button>
       <button data-view="custos">Ações com Custo</button>
+      <button data-view="apresentacao">Apresentação de Resultados</button>
     </div>
 
     <section class="editor-block">
@@ -29,6 +30,7 @@
       <label id="monthlyTitleLabel">Título — Visão Geral<input id="monthlyTitleInput"></label>
       <label id="consolidatedTitleLabel" hidden>Título — Consolidado<input id="consolidatedTitleInput"></label>
       <label id="costTitleLabel" hidden>Título — Ações com Custo<input id="costTitleInput"></label>
+      <label id="presentationTitleLabel" hidden>Título — Apresentação de Resultados<input id="presentationTitleInput"></label>
       <label>Subtítulo<input id="subtitleInput"></label>
       <label>Período<input id="periodInput"></label>
       <label>Atualizado em<input id="dateInput" type="date"></label>
@@ -47,6 +49,12 @@
       <label>Título da seção por responsável<input id="consolidatedSectionTitleInput"></label>
       <label>Rótulo da visão geral<input id="overviewLabelInput"></label>
       <label>Título do consolidado<input id="consolidatedHeadingInput"></label>
+    </section>
+
+    <section id="presentationTextEditor" class="editor-block" hidden>
+      <div class="section-head"><h2>Textos — Apresentação</h2></div>
+      <label>Subtítulo do relatório<input id="presentationSubtitleInput"></label>
+      <p class="muted">A imagem de referência serve apenas como orientação visual. Os nomes, datas e horários cadastrados abaixo são os dados do relatório.</p>
     </section>
 
     <section id="costTextEditor" class="editor-block" hidden>
@@ -83,6 +91,12 @@
       <div id="unitEditors"></div>
     </section>
 
+    <section id="presentationEditor" hidden>
+      <div class="section-head"><h2>Grupos — Apresentação de Resultados</h2><button id="addPresentationGroup" type="button">+ Adicionar grupo</button></div>
+      <p class="muted">Edite grupos, datas, setores e horários. Use ↑ e ↓ para reorganizar. Os dados iniciais reproduzem exatamente o cronograma fornecido.</p>
+      <div id="presentationGroupEditors"></div>
+    </section>
+
     <section id="costEditor" hidden>
       <div class="section-head"><h2>Superintendências — Ações com Custo</h2><button id="addCostUnit" type="button">+ Adicionar</button></div>
       <p class="muted">Informe, em cada superintendência, quantas ações possuem custo e quantas foram concluídas. Os valores por superintendência são independentes do total geral para evitar dupla contagem em ações compartilhadas.</p>
@@ -91,6 +105,7 @@
 
     <div class="actions">
       <button id="presentation" type="button">Modo apresentação</button>
+      <button id="printReport" type="button">Imprimir / PDF</button>
       <button id="exportExcel" type="button">Baixar Excel</button>
       <button id="exportJson" type="button">Exportar backup</button>
       <label class="filebtn">Importar backup<input id="importJson" type="file" accept="application/json" hidden></label>

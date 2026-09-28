@@ -1,10 +1,44 @@
 {
-  "title": "VISÃO GERAL",
+  "versao": "6.0",
+  "monthlyTitle": "VISÃO GERAL",
+  "consolidatedTitle": "Panorama Consolidado de Execução",
+  "costTitle": "AÇÕES COM CUSTO — PLANO DE AÇÃO",
+  "presentationTitle": "APRESENTAÇÃO DE RESULTADOS",
+  "presentationSubtitle": "Cronograma de apresentação dos resultados",
   "subtitle": "Acompanhamento do Plano de Ação",
   "period": "Março a Agosto",
   "date": "2026-09-16",
   "projectTotal": 0,
+  "realizedUntilPeriod": 0,
   "costProjectTotal": 0,
+  "costTotal": 0,
+  "costCompleted": 0,
+  "monthlySectionTitle": "EVOLUÇÃO MENSAL",
+  "executionCardTitle": "EXECUÇÃO DO PLANO",
+  "plannedLabel": "AÇÕES PREVISTAS",
+  "realizedLabel": "AÇÕES REALIZADAS",
+  "consolidatedSectionTitle": "CONCLUSÃO POR SUPERINTENDÊNCIA",
+  "overviewLabel": "VISÃO GERAL",
+  "consolidatedHeading": "Execução consolidada do período",
+  "costSectionTitle": "AÇÕES COM CUSTO POR SUPERINTENDÊNCIA",
+  "categories": {
+    "rl": {
+      "code": "RL",
+      "name": "Realizadas"
+    },
+    "rp": {
+      "code": "RP",
+      "name": "Reprogramadas"
+    },
+    "ca": {
+      "code": "CA",
+      "name": "Canceladas"
+    },
+    "pd": {
+      "code": "PD",
+      "name": "Pendentes"
+    }
+  },
   "months": [
     {
       "name": "Março",
@@ -76,6 +110,196 @@
       "realized": 0
     }
   ],
+  "directors": [
+    {
+      "name": "Renata",
+      "months": [
+        {
+          "name": "Março",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Abril",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Maio",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Junho",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Julho",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Agosto",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        }
+      ]
+    },
+    {
+      "name": "Afra",
+      "months": [
+        {
+          "name": "Março",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Abril",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Maio",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Junho",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Julho",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Agosto",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        }
+      ]
+    },
+    {
+      "name": "Felipe",
+      "months": [
+        {
+          "name": "Março",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Abril",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Maio",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Junho",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Julho",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Agosto",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        }
+      ]
+    },
+    {
+      "name": "Paulo",
+      "months": [
+        {
+          "name": "Março",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Abril",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Maio",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Junho",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Julho",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        },
+        {
+          "name": "Agosto",
+          "rl": 0,
+          "rp": 0,
+          "ca": 0,
+          "pd": 0
+        }
+      ]
+    }
+  ],
   "costUnits": [
     {
       "name": "SG",
@@ -103,7 +327,369 @@
       "completed": 0
     }
   ],
-  "versao": "5.1",
-  "costTotal": 0,
-  "costCompleted": 0
+  "presentationGroups": [
+    {
+      "name": "Grupo 1",
+      "date": "2026-10-15",
+      "sectors": [
+        {
+          "name": "NIR / NIRA",
+          "start": "09:30",
+          "end": "09:45"
+        },
+        {
+          "name": "SPA",
+          "start": "09:45",
+          "end": "10:00"
+        },
+        {
+          "name": "EMERGÊNCIA PED",
+          "start": "10:00",
+          "end": "10:15"
+        },
+        {
+          "name": "TRIAGEM OBSTÉTRICA",
+          "start": "10:15",
+          "end": "10:30"
+        },
+        {
+          "name": "4º CAM - GESTAÇÃO PATOLÓGICA",
+          "start": "10:30",
+          "end": "10:45"
+        },
+        {
+          "name": "5º CAM - UI PUERPÉRIO/ ALOJ. CONJ.",
+          "start": "10:30",
+          "end": "10:45"
+        },
+        {
+          "name": "6º CAM - GINECOLOGIA",
+          "start": "10:30",
+          "end": "10:45"
+        },
+        {
+          "name": "CPN",
+          "start": "10:45",
+          "end": "11:00"
+        },
+        {
+          "name": "COB",
+          "start": "11:00",
+          "end": "11:15"
+        },
+        {
+          "name": "PRÉ-PARTO",
+          "start": "11:15",
+          "end": "11:30"
+        }
+      ]
+    },
+    {
+      "name": "Grupo 2",
+      "date": "2026-10-20",
+      "sectors": [
+        {
+          "name": "UTI PED SIRAG",
+          "start": "09:30",
+          "end": "09:45"
+        },
+        {
+          "name": "UTI CARDIO PED",
+          "start": "09:45",
+          "end": "10:00"
+        },
+        {
+          "name": "UTI PED GERAL",
+          "start": "10:00",
+          "end": "10:15"
+        },
+        {
+          "name": "UTI NEONATAL",
+          "start": "10:15",
+          "end": "10:30"
+        },
+        {
+          "name": "FISIOTERAPIA",
+          "start": "10:30",
+          "end": "10:45"
+        },
+        {
+          "name": "UTI ADULTO CIRURGICA",
+          "start": "10:45",
+          "end": "11:00"
+        },
+        {
+          "name": "UTI ADULTO CLINICA",
+          "start": "11:00",
+          "end": "11:15"
+        }
+      ]
+    },
+    {
+      "name": "Grupo 3",
+      "date": "2026-10-23",
+      "sectors": [
+        {
+          "name": "UI CLINICA MÉDICA",
+          "start": "09:30",
+          "end": "09:45"
+        },
+        {
+          "name": "UI CLINICA CIRURGICA",
+          "start": "09:45",
+          "end": "10:00"
+        },
+        {
+          "name": "3º, 4º HGP e UI PED SIRAG",
+          "start": "10:00",
+          "end": "10:15"
+        },
+        {
+          "name": "2º HGP",
+          "start": "10:15",
+          "end": "10:30"
+        },
+        {
+          "name": "UI CARDIO PED",
+          "start": "10:30",
+          "end": "10:45"
+        },
+        {
+          "name": "UI CARDIO ADULTO",
+          "start": "10:45",
+          "end": "11:00"
+        },
+        {
+          "name": "UI NEFRO HEPATO",
+          "start": "11:00",
+          "end": "11:15"
+        },
+        {
+          "name": "TMO",
+          "start": "11:15",
+          "end": "11:30"
+        }
+      ]
+    },
+    {
+      "name": "Grupo 4",
+      "date": "2026-10-27",
+      "sectors": [
+        {
+          "name": "CENTRO DE DIAGNÓSTICO POR IMAGEM",
+          "start": "09:30",
+          "end": "09:45"
+        },
+        {
+          "name": "LABORATÓRIO DE ANÁLISES CLÍNICAS",
+          "start": "09:45",
+          "end": "10:00"
+        },
+        {
+          "name": "CENTRO DE DIAGNÓSTICO",
+          "start": "10:00",
+          "end": "10:15"
+        },
+        {
+          "name": "BANCO DE OLHOS",
+          "start": "10:15",
+          "end": "10:30"
+        },
+        {
+          "name": "MEDICINA NUCLEAR",
+          "start": "10:30",
+          "end": "10:45"
+        },
+        {
+          "name": "AG. TRANSFUSIONAL",
+          "start": "10:45",
+          "end": "11:00"
+        },
+        {
+          "name": "ANATOMIA PATOLOGICA",
+          "start": "11:00",
+          "end": "11:15"
+        }
+      ]
+    },
+    {
+      "name": "Grupo 5",
+      "date": "2026-10-30",
+      "sectors": [
+        {
+          "name": "BANCO DE LEITE",
+          "start": "09:30",
+          "end": "09:45"
+        },
+        {
+          "name": "LACTÁRIO/ SONDÁRIO/ FRACIONAMENTO",
+          "start": "09:45",
+          "end": "10:00"
+        },
+        {
+          "name": "NUTRIÇÃO CLÍNICA MATERNO, INFANTIL E ADULTO",
+          "start": "10:00",
+          "end": "10:15"
+        },
+        {
+          "name": "UAN - UNIDADE DE ALIMENTAÇÃO E NUTRIÇÃO",
+          "start": "10:15",
+          "end": "10:30"
+        },
+        {
+          "name": "FONOAUDIOLOGIA",
+          "start": "10:30",
+          "end": "10:45"
+        },
+        {
+          "name": "ODONTOLOGIA",
+          "start": "10:45",
+          "end": "11:00"
+        },
+        {
+          "name": "SERVIÇO SOCIAL",
+          "start": "11:00",
+          "end": "11:15"
+        },
+        {
+          "name": "PSICOLOGIA",
+          "start": "11:15",
+          "end": "11:30"
+        }
+      ]
+    },
+    {
+      "name": "Grupo 6",
+      "date": "2026-11-03",
+      "sectors": [
+        {
+          "name": "AMB. ONCO ADULTO",
+          "start": "09:30",
+          "end": "09:45"
+        },
+        {
+          "name": "UI ONCO ADULTO",
+          "start": "09:45",
+          "end": "10:00"
+        },
+        {
+          "name": "AMB. ONCO PED",
+          "start": "10:00",
+          "end": "10:15"
+        },
+        {
+          "name": "UI ONCO PED",
+          "start": "10:15",
+          "end": "10:30"
+        },
+        {
+          "name": "UTI ONCO PED",
+          "start": "10:30",
+          "end": "10:45"
+        },
+        {
+          "name": "AMB. GERAL",
+          "start": "10:45",
+          "end": "11:00"
+        },
+        {
+          "name": "CER IV",
+          "start": "11:00",
+          "end": "11:15"
+        }
+      ]
+    },
+    {
+      "name": "Grupo 7",
+      "date": "2026-11-06",
+      "sectors": [
+        {
+          "name": "TERAPIA RENAL ADULTO",
+          "start": "09:30",
+          "end": "09:45"
+        },
+        {
+          "name": "TERAPIA RENAL PED",
+          "start": "09:45",
+          "end": "10:00"
+        },
+        {
+          "name": "UGT",
+          "start": "10:00",
+          "end": "10:15"
+        },
+        {
+          "name": "HEMODINÂMICA",
+          "start": "10:15",
+          "end": "10:30"
+        },
+        {
+          "name": "BLOCOS CIRURGICOS",
+          "start": "10:30",
+          "end": "10:45"
+        },
+        {
+          "name": "CME",
+          "start": "10:45",
+          "end": "11:00"
+        }
+      ]
+    },
+    {
+      "name": "Grupo 8",
+      "date": "2026-11-10",
+      "sectors": [
+        {
+          "name": "CENTRAL DE MAQUEIROS",
+          "start": "09:30",
+          "end": "09:45"
+        },
+        {
+          "name": "GESTÃO DE TI",
+          "start": "09:45",
+          "end": "10:00"
+        },
+        {
+          "name": "HOTELARIA",
+          "start": "10:00",
+          "end": "10:15"
+        },
+        {
+          "name": "LAVANDERIA",
+          "start": "10:15",
+          "end": "10:30"
+        },
+        {
+          "name": "HIGIENIZAÇÃO",
+          "start": "10:30",
+          "end": "10:45"
+        },
+        {
+          "name": "FARMÁCIA",
+          "start": "10:45",
+          "end": "11:00"
+        },
+        {
+          "name": "FARMÁCIA CLÍNICA",
+          "start": "11:00",
+          "end": "11:15"
+        },
+        {
+          "name": "CAD - CENTRAL DE ABASTECIMENTO E DISTRIBUIÇÃO",
+          "start": "11:15",
+          "end": "11:30"
+        },
+        {
+          "name": "COMPRAS",
+          "start": "11:30",
+          "end": "11:45"
+        },
+        {
+          "name": "FATURAMENTO",
+          "start": "11:45",
+          "end": "12:00"
+        }
+      ]
+    }
+  ]
 }

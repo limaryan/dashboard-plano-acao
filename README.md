@@ -1,4 +1,4 @@
-# Dashboard Plano de Ação — V5
+# Dashboard Plano de Ação — V6
 
 Aplicação web estática para GitHub Pages, sem banco de dados e sem custos de hospedagem além do próprio domínio, se houver.
 
@@ -37,3 +37,24 @@ A exportação `.xlsx` usa a biblioteca SheetJS Community Edition carregada pelo
 
 ## Correção V5.2
 - Indicadores de ações com custo agora exibem **N/A — Sem ações com custo** quando o total de ações com custo é 0, inclusive nos cards por superintendência.
+
+
+## Novidades da V6 — Apresentação de Resultados
+
+- Nova aba **Apresentação de Resultados** integrada ao mesmo dashboard.
+- Oito grupos iniciais cadastrados exatamente conforme o cronograma fornecido.
+- Edição de título e subtítulo do relatório.
+- Edição de nome e data dos grupos.
+- Edição de setores e horários.
+- Adição e exclusão de grupos e setores.
+- Reordenação de grupos e setores com controles ↑ / ↓.
+- Pré-visualização em tempo real no próprio dashboard.
+- Botão **Imprimir / PDF** usando a impressão do navegador.
+- Validação de data, setor e horários antes da impressão.
+- Exportação Excel agora inclui a aba **Apresentacao**.
+- Backup JSON inclui os dados da apresentação.
+- As funcionalidades anteriores da V5.2 permanecem disponíveis.
+
+### Publicação
+
+Substitua os arquivos da versão anterior pela pasta da V6 no mesmo repositório do GitHub Pages e faça um novo commit.
