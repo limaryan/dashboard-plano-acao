@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard Plano de Ação — V6.2</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <aside id="editor" class="editor">
+    <div class="editor-topbar">
+      <div>
+        <h1>Gerador de Relatório</h1>
+        <p class="muted">Edite textos e dados; o dashboard atualiza automaticamente.</p>
+      </div>
+      <button id="collapseSidebar" class="icon-btn" type="button" title="Recolher barra lateral" aria-label="Recolher barra lateral">☰</button>
+    </div>
+
+    <div class="tabs">
+      <button data-view="mensal" class="active">Visão Geral</button>
+      <button data-view="consolidado">Consolidado</button>
+      <button data-view="sgdiretoria">SG por Diretoria</button>
+      <button data-view="custos">Ações com Custo</button>
+      <button data-view="apresentacao">Apresentação de Resultados</button>
+    </div>
+
+    <section id="commonHeaderEditor" class="editor-block">
+      <div class="section-head"><h2>Cabeçalho</h2></div>
+      <label id="monthlyTitleLabel">Título — Visão Geral<input id="monthlyTitleInput"></label>
+      <label id="consolidatedTitleLabel" hidden>Título — Consolidado<input id="consolidatedTitleInput"></label>
+      <label id="costTitleLabel" hidden>Título — Ações com Custo<input id="costTitleInput"></label>
+      <label>Subtítulo<input id="subtitleInput"></label>
+      <label>Período<input id="periodInput"></label>
+      <label>Atualizado em<input id="dateInput" type="date"></label>
+    </section>
+
+    <section id="monthlyTextEditor" class="editor-block">
+      <div class="section-head"><h2>Textos — Visão Geral</h2></div>
+      <label>Título da seção mensal<input id="monthlySectionTitleInput"></label>
+      <label>Título do card de execução<input id="executionCardTitleInput"></label>
+      <label>Legenda do total previsto<input id="plannedLabelInput"></label>
+      <label>Legenda do total realizado<input id="realizedLabelInput"></label>
+    </section>
+
+    <section id="consolidatedTextEditor" class="editor-block" hidden>
+      <div class="section-head"><h2>Textos — Consolidado</h2></div>
+      <label>Título da seção por responsável<input id="consolidatedSectionTitleInput"></label>
+      <label>Rótulo da visão geral<input id="overviewLabelInput"></label>
+      <label>Título do consolidado<input id="consolidatedHeadingInput"></label>
+    </section>
+
+    <section id="presentationTextEditor" class="editor-block" hidden>
+      <div class="edit-mode-badge">MODO DE EDIÇÃO</div>
+      <div class="section-head"><h2>Editar Apresentação</h2></div>
+      <label>Título do relatório<input id="presentationTitleInput"></label>
+      <label>Subtítulo do relatório<input id="presentationSubtitleInput"></label>
+      <p class="muted">Altere livremente nomes de grupos, dias, nomes dos setores e horários. Para trocar um setor de dia, selecione outro grupo no campo “Dia / Grupo”. Novos setores podem ser adicionados abaixo.</p>
+      <button id="savePresentation" class="primary-action" type="button">✓ Salvar e visualizar</button>
+    </section>
+
+    <section id="costTextEditor" class="editor-block" hidden>
+      <div class="section-head"><h2>Textos — Ações com Custo</h2></div>
+      <label>Título da seção por superintendência<input id="costSectionTitleInput"></label>
+      <label>Ações totais do plano<input id="costProjectTotal" type="number" min="0"></label>
+      <label>Ações com custo<input id="costTotal" type="number" min="0"></label>
+      <label>Concluídas com custo<input id="costCompleted" type="number" min="0"></label>
+      <p class="muted">Os três valores do resumo são informados manualmente. As superintendências abaixo são exibidas como detalhamento e não são somadas no total geral.</p>
+    </section>
+
+    <details id="categoryEditorBlock" class="editor-block">
+      <summary>Categorias e siglas</summary>
+      <p class="muted">As cores permanecem padronizadas; nomes e siglas são editáveis.</p>
+      <div id="categoryEditors"></div>
+    </details>
+
+    <section id="monthlyEditor">
+      <div class="section-head"><h2>Meses</h2><button id="addMonth" type="button">+ Adicionar</button></div>
+      <div id="monthEditors"></div>
+    </section>
+
+    <section id="directorEditor" hidden>
+      <div class="section-head"><h2>Diretorias — SG</h2><button id="addDirector" type="button">+ Adicionar</button></div>
+      <p class="muted">Cada diretoria possui sua própria evolução mensal. Os nomes são editáveis e novas diretorias podem ser adicionadas quando necessário.</p>
+      <div id="directorEditors"></div>
+    </section>
+
+    <section id="unitEditor" hidden>
+      <div class="section-head"><h2>Superintendências / Diretorias</h2><button id="addUnit" type="button">+ Adicionar</button></div>
+      <label>Ações totais do projeto<input id="projectTotal" type="number" min="0"></label>
+      <label>Realizadas até o período<input id="realizedUntilPeriod" type="number" min="0"></label>
+      <p class="muted">Os dois campos acima são manuais. Ações previstas, ações realizadas e o percentual do consolidado são calculados automaticamente pela soma das superintendências/diretorias abaixo.</p>
+      <div id="unitEditors"></div>
+    </section>
+
+    <section id="presentationEditor" hidden>
+      <div class="section-head"><h2>Grupos e Setores</h2><button id="addPresentationGroup" type="button">+ Adicionar grupo</button></div>
+      <p class="muted">Tudo abaixo é editável. Você pode renomear setores, alterar horários, adicionar ou excluir setores e mover qualquer setor para outro dia/grupo.</p>
+      <div id="presentationGroupEditors"></div>
+    </section>
+
+    <section id="costEditor" hidden>
+      <div class="section-head"><h2>Superintendências — Ações com Custo</h2><button id="addCostUnit" type="button">+ Adicionar</button></div>
+      <p class="muted">Informe, em cada superintendência, quantas ações possuem custo e quantas foram concluídas. Os valores por superintendência são independentes do total geral para evitar dupla contagem em ações compartilhadas.</p>
+      <div id="costUnitEditors"></div>
+    </section>
+
+    <div class="actions">
+      <button id="presentation" type="button">Modo apresentação</button>
+      <button id="printReport" type="button">Imprimir / PDF</button>
+      <button id="exportExcel" type="button">Baixar Excel</button>
+      <button id="exportJson" type="button">Exportar backup</button>
+      <label class="filebtn">Importar backup<input id="importJson" type="file" accept="application/json" hidden></label>
+      <button id="reset" type="button">Zerar valores</button>
+    </div>
+  </aside>
+
+  <main class="stage">
+    <button id="openSidebar" class="sidebar-open" type="button" title="Abrir barra lateral" aria-label="Abrir barra lateral">☰</button>
+    <section id="dashboard" class="dashboard"></section>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="js/calculations.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
