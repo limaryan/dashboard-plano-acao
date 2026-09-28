@@ -64,6 +64,7 @@
   }
   let state; try{const saved=localStorage.getItem(KEY)||localStorage.getItem('planoAcaoDashboardV5')||localStorage.getItem('planoAcaoDashboardV2');state=normalize(JSON.parse(saved)||{})}catch{state=clone(seed)}
   let view='mensal';
+  let presentationEditing=false;
   function save(){localStorage.setItem(KEY,JSON.stringify(state))}
   function dateBR(v){if(!v)return'';const[y,m,d]=v.split('-');return y&&m&&d?`${d}/${m}/${y}`:v}
   function cat(k){return state.categories[k]||seed.categories[k]}
@@ -82,7 +83,7 @@
     unitEditors.innerHTML=state.units.map((u,i)=>`<div class="entry" data-ui="${i}"><div class="entry-top"><input data-k="name" value="${esc(u.name)}"><button class="delete" data-del-unit="${i}" type="button">Excluir</button></div><div class="grid-inputs"><label>Previstas<input type="number" min="0" data-k="planned" value="${u.planned}"></label><label>Realizadas<input type="number" min="0" data-k="realized" value="${u.realized}"></label></div></div>`).join('');
     directorEditors.innerHTML=state.directors.map((d,di)=>`<div class="entry director-entry" data-di="${di}"><div class="entry-top"><input class="director-name" data-k="name" value="${esc(d.name)}"><button class="delete" data-del-director="${di}" type="button">Excluir</button></div><div class="director-month-inputs">${d.months.map((m,mi)=>`<div class="director-month-edit" data-dmi="${mi}"><b>${esc(m.name)}</b><div class="grid-inputs">${['rl','rp','ca','pd'].map(k=>`<label>${esc(cat(k).code)}<input type="number" min="0" data-k="${k}" value="${m[k]}"></label>`).join('')}</div></div>`).join('')}</div></div>`).join('');
     costUnitEditors.innerHTML=state.costUnits.map((u,i)=>`<div class="entry" data-cui="${i}"><div class="entry-top"><input data-k="name" value="${esc(u.name)}"><button class="delete" data-del-cost-unit="${i}" type="button">Excluir</button></div><div class="grid-inputs"><label>Ações com custo<input type="number" min="0" data-k="costActions" value="${u.costActions}"></label><label>Concluídas<input type="number" min="0" data-k="completed" value="${u.completed}"></label></div></div>`).join('');
-    presentationGroupEditors.innerHTML=state.presentationGroups.map((g,gi)=>`<div class="entry presentation-group-edit" data-pgi="${gi}"><div class="entry-top"><input data-pk="name" value="${esc(g.name)}"><input type="date" data-pk="date" value="${esc(g.date)}"><div class="reorder"><button type="button" data-pg-up="${gi}" title="Mover para cima">↑</button><button type="button" data-pg-down="${gi}" title="Mover para baixo">↓</button></div><button class="delete" data-del-pgroup="${gi}" type="button">Excluir</button></div><div class="presentation-sector-editors">${g.sectors.map((x,si)=>`<div class="sector-edit" data-pgi="${gi}" data-si="${si}"><input data-sk="name" value="${esc(x.name)}" placeholder="Setor"><input type="time" data-sk="start" value="${esc(x.start)}"><input type="time" data-sk="end" value="${esc(x.end)}"><div class="reorder"><button type="button" data-ps-up="${gi}:${si}" title="Mover setor para cima">↑</button><button type="button" data-ps-down="${gi}:${si}" title="Mover setor para baixo">↓</button></div><button class="delete" type="button" data-del-psector="${gi}:${si}">Excluir</button></div>`).join('')}</div><button class="add-inline" type="button" data-add-psector="${gi}">+ Adicionar setor</button></div>`).join('');
+    presentationGroupEditors.innerHTML=state.presentationGroups.map((g,gi)=>`<div class="entry presentation-group-edit" data-pgi="${gi}"><div class="entry-top"><div class="presentation-group-fields"><label>Nome do grupo<input data-pk="name" value="${esc(g.name)}"></label><label>Dia da apresentação<input type="date" data-pk="date" value="${esc(g.date)}"></label></div><div class="reorder"><button type="button" data-pg-up="${gi}" title="Mover grupo para cima">↑</button><button type="button" data-pg-down="${gi}" title="Mover grupo para baixo">↓</button></div><button class="delete" data-del-pgroup="${gi}" type="button">Excluir grupo</button></div><div class="editor-group-caption">${g.sectors.length} setor${g.sectors.length===1?'':'es'} • Edite diretamente o <b>setor</b> e o <b>horário</b>. O grupo e a data também são editáveis.</div><div class="presentation-sector-table-head"><span>SETOR</span><span>HORÁRIO</span><span>DIA / GRUPO</span><span>AÇÕES</span></div><div class="presentation-sector-editors">${g.sectors.map((x,si)=>`<div class="sector-edit" data-pgi="${gi}" data-si="${si}"><label class="sector-name-field"><span>Setor</span><input data-sk="name" value="${esc(x.name)}" placeholder="Nome do setor"></label><label class="sector-time-field"><span>Horário</span><div class="time-pair"><input type="time" data-sk="start" value="${esc(x.start)}" title="Horário inicial"><b>–</b><input type="time" data-sk="end" value="${esc(x.end)}" title="Horário final"></div></label><label class="sector-move-field"><span>Dia / Grupo</span><select data-sk="move" title="Mover setor para outro grupo">${state.presentationGroups.map((target,ti)=>`<option value="${ti}" ${ti===gi?'selected':''}>${esc(target.name)} — ${dateBR(target.date)||'sem data'}</option>`).join('')}</select></label><div class="sector-actions"><div class="reorder"><button type="button" data-ps-up="${gi}:${si}" title="Mover setor para cima">↑</button><button type="button" data-ps-down="${gi}:${si}" title="Mover setor para baixo">↓</button></div><button class="delete" type="button" data-del-psector="${gi}:${si}">Excluir</button></div></div>`).join('')}</div><button class="add-inline" type="button" data-add-psector="${gi}">+ Adicionar setor</button></div>`).join('');
   }
 
   function header(title){return `<header class="hero"><div><h1>${esc(title)}</h1><p>${esc(state.subtitle)}</p></div><div class="hero-right"><b>${esc(state.period)}</b><p>Atualizado em ${dateBR(state.date)}</p></div></header>`}
@@ -103,7 +104,7 @@
   }
 
   function presentationDashboard(){
-    return `<div class="presentation-report"><div class="presentation-report-head"><div><h1>${esc(state.presentationTitle)}</h1><p>${esc(state.presentationSubtitle)}</p></div><div class="presentation-report-meta"><b>${state.presentationGroups.length} grupos</b><span>Atualizado em ${dateBR(state.date)}</span></div></div><div class="presentation-grid">${state.presentationGroups.map((g,gi)=>`<section class="presentation-group-card"><div class="presentation-group-head"><div><h2>${esc(g.name).toUpperCase()}</h2><strong>${dateBR(g.date)}</strong></div><span>GRUPO ${gi+1}</span></div><div class="presentation-table-head"><span>SETORES</span><span>HORÁRIO</span></div><div class="presentation-rows">${g.sectors.map(x=>`<div class="presentation-row"><span>${esc(x.name)}</span><b>${esc(x.start)} - ${esc(x.end)}</b></div>`).join('')}</div></section>`).join('')}</div></div>`;
+    return `<div class="presentation-report"><div class="presentation-report-head"><div><h1>${esc(state.presentationTitle)}</h1><p>${esc(state.presentationSubtitle)}</p></div><div class="presentation-report-meta"><b>${state.presentationGroups.length} grupos</b><span>Atualizado em ${dateBR(state.date)}</span><button class="presentation-edit-btn" type="button" data-presentation-edit="1">Editar</button></div></div><div class="presentation-grid">${state.presentationGroups.map((g,gi)=>`<section class="presentation-group-card"><div class="presentation-group-head"><div><h2>${esc(g.name).toUpperCase()}</h2><strong>${dateBR(g.date)}</strong></div><span>GRUPO ${gi+1}</span></div><div class="presentation-table-head"><span>SETORES</span><span>HORÁRIO</span></div><div class="presentation-rows">${g.sectors.map(x=>`<div class="presentation-row"><span>${esc(x.name)}</span><b>${esc(x.start)} - ${esc(x.end)}</b></div>`).join('')}</div></section>`).join('')}</div></div>`;
   }
   function render(){dashboard.innerHTML=view==='mensal'?monthly():view==='consolidado'?consolidated():view==='sgdiretoria'?sgDiretoria():view==='custos'?costDashboard():presentationDashboard();save()}
   function bindText(id,key){$(id).addEventListener('input',e=>{state[key]=e.target.value;render()})}
@@ -131,6 +132,35 @@
     state.costUnits.forEach(u=>{u.costActions=u.completed=0});
   }
 
+  function renderPresentationControls(){
+    const isP=view==='apresentacao';
+    const editorHeading=document.querySelector('.editor-topbar h1');
+    const editorSub=document.querySelector('.editor-topbar .muted');
+    if(editorHeading) editorHeading.textContent=isP&&presentationEditing?'Editar Apresentação de Resultados':'Gerador de Relatório';
+    if(editorSub) editorSub.textContent=isP&&presentationEditing?'Altere grupos, dias, setores e horários. Salve para voltar à visualização.':'Edite textos e dados; o dashboard atualiza automaticamente.';
+    monthlyEditor.hidden=!(!isP && view==='mensal');
+    monthlyTextEditor.hidden=!(!isP && view==='mensal');
+    monthlyTitleLabel.hidden=!(!isP && view==='mensal');
+    unitEditor.hidden=!(view==='consolidado');
+    consolidatedTextEditor.hidden=!(view==='consolidado');
+    consolidatedTitleLabel.hidden=!(view==='consolidado');
+    directorEditor.hidden=!(view==='sgdiretoria');
+    costEditor.hidden=!(view==='custos');
+    costTextEditor.hidden=!(view==='custos');
+    costTitleLabel.hidden=!(view==='custos');
+    const showPEdit=isP&&presentationEditing;
+    presentationEditor.hidden=!showPEdit;
+    presentationTextEditor.hidden=!showPEdit;
+    commonHeaderEditor.hidden=isP;
+    categoryEditorBlock.hidden=isP;
+    if(isP&&!presentationEditing) document.body.classList.add('sidebar-collapsed');
+    if(isP&&presentationEditing) document.body.classList.remove('sidebar-collapsed');
+    if(isP&&!presentationEditing){
+      presentationTitleInput.value=state.presentationTitle;
+      presentationSubtitleInput.value=state.presentationSubtitle;
+    }
+  }
+
   function bind(){
     bindText('#monthlyTitleInput','monthlyTitle');bindText('#consolidatedTitleInput','consolidatedTitle');bindText('#costTitleInput','costTitle');bindText('#presentationTitleInput','presentationTitle');bindText('#presentationSubtitleInput','presentationSubtitle');bindText('#subtitleInput','subtitle');bindText('#periodInput','period');bindText('#dateInput','date');bindText('#monthlySectionTitleInput','monthlySectionTitle');bindText('#executionCardTitleInput','executionCardTitle');bindText('#plannedLabelInput','plannedLabel');bindText('#realizedLabelInput','realizedLabel');bindText('#consolidatedSectionTitleInput','consolidatedSectionTitle');bindText('#overviewLabelInput','overviewLabel');bindText('#consolidatedHeadingInput','consolidatedHeading');bindText('#costSectionTitleInput','costSectionTitle');
     projectTotal.addEventListener('input',e=>{state.projectTotal=num(e.target.value);render()});realizedUntilPeriod.addEventListener('input',e=>{state.realizedUntilPeriod=num(e.target.value);render()});costProjectTotal.addEventListener('input',e=>{state.costProjectTotal=num(e.target.value);render()});costTotal.addEventListener('input',e=>{state.costTotal=num(e.target.value);render()});costCompleted.addEventListener('input',e=>{state.costCompleted=num(e.target.value);render()});
@@ -139,14 +169,17 @@
     unitEditors.addEventListener('input',e=>{const box=e.target.closest('[data-ui]');if(!box)return;const k=e.target.dataset.k,i=+box.dataset.ui;state.units[i][k]=k==='name'?e.target.value:num(e.target.value);render()});
     directorEditors.addEventListener('input',e=>{const box=e.target.closest('[data-di]');if(!box)return;const di=+box.dataset.di,k=e.target.dataset.k;if(k==='name'){state.directors[di].name=e.target.value;render();return}const mb=e.target.closest('[data-dmi]');if(mb&&k){state.directors[di].months[+mb.dataset.dmi][k]=num(e.target.value);render()}});
     costUnitEditors.addEventListener('input',e=>{const box=e.target.closest('[data-cui]');if(!box)return;const i=+box.dataset.cui,k=e.target.dataset.k;if(!k)return;state.costUnits[i][k]=k==='name'?e.target.value:num(e.target.value);render()});
-    presentationGroupEditors.addEventListener('input',e=>{const group=e.target.closest('[data-pgi]');if(!group)return;const gi=+group.dataset.pgi;if(e.target.dataset.pk){state.presentationGroups[gi][e.target.dataset.pk]=e.target.dataset.pk==='name'?e.target.value:e.target.value;render();return}const sector=e.target.closest('[data-si]');if(sector&&e.target.dataset.sk){const si=+sector.dataset.si;state.presentationGroups[gi].sectors[si][e.target.dataset.sk]=e.target.value;render()}});
+    presentationGroupEditors.addEventListener('input',e=>{const group=e.target.closest('[data-pgi]');if(!group)return;const gi=+group.dataset.pgi;if(e.target.dataset.pk){state.presentationGroups[gi][e.target.dataset.pk]=e.target.value;render();return}const sector=e.target.closest('[data-si]');if(sector&&e.target.dataset.sk&&e.target.dataset.sk!=='move'){const si=+sector.dataset.si;state.presentationGroups[gi].sectors[si][e.target.dataset.sk]=e.target.value;render()}});
+    presentationGroupEditors.addEventListener('change',e=>{const sector=e.target.closest('[data-si]');if(!sector||e.target.dataset.sk!=='move')return;const [gi,si]=[+sector.dataset.pgi,+sector.dataset.si];const target=+e.target.value;if(target===gi)return;const item=state.presentationGroups[gi].sectors.splice(si,1)[0];state.presentationGroups[target].sectors.push(item);renderEditors();render()});
+    savePresentation.onclick=()=>{save();presentationEditing=false;renderPresentationControls();document.body.classList.add('sidebar-collapsed');render()};
     document.addEventListener('click',e=>{
+      if(e.target.dataset.presentationEdit!==undefined){presentationEditing=true;renderPresentationControls();document.body.classList.remove('sidebar-collapsed');renderEditors();render();const ed=document.querySelector('.editor');if(ed)ed.scrollTo({top:0,behavior:'smooth'});return}
       if(e.target.dataset.delMonth!==undefined){state.months.splice(+e.target.dataset.delMonth,1);syncDirectorMonths();renderEditors();render()}
       if(e.target.dataset.delUnit!==undefined){state.units.splice(+e.target.dataset.delUnit,1);renderEditors();render()}
       if(e.target.dataset.delDirector!==undefined){state.directors.splice(+e.target.dataset.delDirector,1);renderEditors();render()}
       if(e.target.dataset.delCostUnit!==undefined){state.costUnits.splice(+e.target.dataset.delCostUnit,1);renderEditors();render()}
       if(e.target.dataset.delPgroup!==undefined){state.presentationGroups.splice(+e.target.dataset.delPgroup,1);renderEditors();render()}
-      if(e.target.dataset.addPsector!==undefined){state.presentationGroups[+e.target.dataset.addPsector].sectors.push({name:'Novo setor',start:'09:30',end:'09:45'});renderEditors();render()}
+      if(e.target.dataset.addPsector!==undefined){state.presentationGroups[+e.target.dataset.addPsector].sectors.push({name:'Novo setor',start:'',end:''});renderEditors();render()}
       if(e.target.dataset.delPsector){const [gi,si]=e.target.dataset.delPsector.split(':').map(Number);state.presentationGroups[gi].sectors.splice(si,1);renderEditors();render()}
       if(e.target.dataset.pgUp!==undefined){const i=+e.target.dataset.pgUp;if(i>0){[state.presentationGroups[i-1],state.presentationGroups[i]]=[state.presentationGroups[i],state.presentationGroups[i-1]];renderEditors();render()}}
       if(e.target.dataset.pgDown!==undefined){const i=+e.target.dataset.pgDown;if(i<state.presentationGroups.length-1){[state.presentationGroups[i+1],state.presentationGroups[i]]=[state.presentationGroups[i],state.presentationGroups[i+1]];renderEditors();render()}}
@@ -159,13 +192,10 @@
     addCostUnit.onclick=()=>{state.costUnits.push({name:'Nova superintendência',costActions:0,completed:0});renderEditors();render()};
     addPresentationGroup.onclick=()=>{state.presentationGroups.push({name:`Grupo ${state.presentationGroups.length+1}`,date:'',sectors:[]});renderEditors();render()};
     document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{
-      view=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===b));
-      const isM=view==='mensal',isC=view==='consolidado',isD=view==='sgdiretoria',isCost=view==='custos',isP=view==='apresentacao';
-      monthlyEditor.hidden=!isM;monthlyTextEditor.hidden=!isM;monthlyTitleLabel.hidden=!isM;
-      unitEditor.hidden=!isC;consolidatedTextEditor.hidden=!isC;consolidatedTitleLabel.hidden=!isC;
-      directorEditor.hidden=!isD;
-      costEditor.hidden=!isCost;costTextEditor.hidden=!isCost;costTitleLabel.hidden=!isCost;
-      presentationEditor.hidden=!isP;presentationTextEditor.hidden=!isP;presentationTitleLabel.hidden=!isP;
+      view=b.dataset.view;
+      if(view==='apresentacao')presentationEditing=false;
+      document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===b));
+      renderPresentationControls();
       render();
     });
     presentation.onclick=()=>{document.body.classList.add('presentation');const b=document.createElement('button');b.className='presentation-exit';b.textContent='Sair da apresentação';b.onclick=()=>{document.body.classList.remove('presentation');b.remove()};document.body.appendChild(b)};
@@ -186,11 +216,11 @@
       }
       window.print();
     };
-    exportJson.onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dados-dashboard-v6.json';a.click();URL.revokeObjectURL(a.href)};
+    exportJson.onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dados-dashboard-v6.2.json';a.click();URL.revokeObjectURL(a.href)};
     importJson.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=normalize(JSON.parse(r.result));renderEditors();render()}catch{alert('Arquivo JSON inválido.')}};r.readAsText(f)};
     reset.onclick=()=>{if(confirm('Zerar todos os valores numéricos? Meses, nomes, diretorias, superintendências e textos serão mantidos.')){zeroValues();renderEditors();render()}};
     const setSidebar=collapsed=>document.body.classList.toggle('sidebar-collapsed',collapsed);
     collapseSidebar.onclick=()=>setSidebar(true); openSidebar.onclick=()=>setSidebar(false);
   }
-  renderEditors();bind();render();
+  renderEditors();bind();renderPresentationControls();render();
 })();

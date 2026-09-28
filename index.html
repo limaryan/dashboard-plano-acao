@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Dashboard Plano de Ação — V6</title>
+  <title>Dashboard Plano de Ação — V6.2</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -25,12 +25,11 @@
       <button data-view="apresentacao">Apresentação de Resultados</button>
     </div>
 
-    <section class="editor-block">
+    <section id="commonHeaderEditor" class="editor-block">
       <div class="section-head"><h2>Cabeçalho</h2></div>
       <label id="monthlyTitleLabel">Título — Visão Geral<input id="monthlyTitleInput"></label>
       <label id="consolidatedTitleLabel" hidden>Título — Consolidado<input id="consolidatedTitleInput"></label>
       <label id="costTitleLabel" hidden>Título — Ações com Custo<input id="costTitleInput"></label>
-      <label id="presentationTitleLabel" hidden>Título — Apresentação de Resultados<input id="presentationTitleInput"></label>
       <label>Subtítulo<input id="subtitleInput"></label>
       <label>Período<input id="periodInput"></label>
       <label>Atualizado em<input id="dateInput" type="date"></label>
@@ -52,9 +51,12 @@
     </section>
 
     <section id="presentationTextEditor" class="editor-block" hidden>
-      <div class="section-head"><h2>Textos — Apresentação</h2></div>
+      <div class="edit-mode-badge">MODO DE EDIÇÃO</div>
+      <div class="section-head"><h2>Editar Apresentação</h2></div>
+      <label>Título do relatório<input id="presentationTitleInput"></label>
       <label>Subtítulo do relatório<input id="presentationSubtitleInput"></label>
-      <p class="muted">A imagem de referência serve apenas como orientação visual. Os nomes, datas e horários cadastrados abaixo são os dados do relatório.</p>
+      <p class="muted">Altere livremente nomes de grupos, dias, nomes dos setores e horários. Para trocar um setor de dia, selecione outro grupo no campo “Dia / Grupo”. Novos setores podem ser adicionados abaixo.</p>
+      <button id="savePresentation" class="primary-action" type="button">✓ Salvar e visualizar</button>
     </section>
 
     <section id="costTextEditor" class="editor-block" hidden>
@@ -66,7 +68,7 @@
       <p class="muted">Os três valores do resumo são informados manualmente. As superintendências abaixo são exibidas como detalhamento e não são somadas no total geral.</p>
     </section>
 
-    <details class="editor-block">
+    <details id="categoryEditorBlock" class="editor-block">
       <summary>Categorias e siglas</summary>
       <p class="muted">As cores permanecem padronizadas; nomes e siglas são editáveis.</p>
       <div id="categoryEditors"></div>
@@ -92,8 +94,8 @@
     </section>
 
     <section id="presentationEditor" hidden>
-      <div class="section-head"><h2>Grupos — Apresentação de Resultados</h2><button id="addPresentationGroup" type="button">+ Adicionar grupo</button></div>
-      <p class="muted">Edite grupos, datas, setores e horários. Use ↑ e ↓ para reorganizar. Os dados iniciais reproduzem exatamente o cronograma fornecido.</p>
+      <div class="section-head"><h2>Grupos e Setores</h2><button id="addPresentationGroup" type="button">+ Adicionar grupo</button></div>
+      <p class="muted">Tudo abaixo é editável. Você pode renomear setores, alterar horários, adicionar ou excluir setores e mover qualquer setor para outro dia/grupo.</p>
       <div id="presentationGroupEditors"></div>
     </section>
 
