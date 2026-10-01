@@ -101,3 +101,32 @@ body.printing #editor,body.printing .sidebar-open,body.printing .presentation-ex
   .sector-actions{height:auto}
   .presentation-report-actions{flex-wrap:wrap}
 }
+
+
+/* V6.4 - editor da apresentação simplificado, sem arrastar */
+.presentation-group-edit{padding:14px;border-radius:12px;background:#fff;border:1px solid #dfe6ee}
+.presentation-group-edit .entry-top{display:flex;align-items:flex-end;gap:8px;flex-wrap:nowrap}
+.presentation-group-fields{display:grid;grid-template-columns:minmax(0,1fr) 155px;gap:8px;flex:1 1 auto;min-width:0}
+.presentation-group-fields label{margin:0}
+.presentation-group-fields input{width:100%;box-sizing:border-box}
+.presentation-group-edit .editor-group-caption{margin:9px 0 2px;font-size:10px}
+.presentation-sector-table-head{grid-template-columns:minmax(0,1fr) 155px 175px 105px;gap:8px;margin-top:12px;padding:7px 0}
+.sector-edit{grid-template-columns:minmax(0,1fr) 155px 175px 105px!important;gap:8px;padding:10px 0;align-items:end;border-top:1px solid #e8edf3}
+.sector-edit label{min-width:0}
+.sector-edit label span{margin-bottom:4px}
+.sector-edit input,.sector-edit select{box-sizing:border-box;width:100%;height:34px;padding:7px 9px!important}
+.time-pair{grid-template-columns:minmax(0,1fr) 12px minmax(0,1fr);gap:3px}
+.time-pair input{min-width:0}
+.sector-actions{height:34px;display:flex;align-items:center;gap:5px}
+.sector-actions .reorder{display:flex;gap:3px}
+.sector-actions .reorder button{width:28px;height:30px}
+.sector-actions .delete{height:30px;padding:0 8px}
+.drag-handle,.drag-title{display:none!important}
+@media(max-width:900px){
+  .presentation-group-edit .entry-top{flex-wrap:wrap}
+  .presentation-group-fields{grid-template-columns:1fr}
+  .presentation-sector-table-head{display:none}
+  .sector-edit{grid-template-columns:1fr 1fr!important}
+  .sector-name-field,.sector-move-field{grid-column:1/-1}
+  .sector-actions{grid-column:1/-1}
+}

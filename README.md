@@ -1,4 +1,4 @@
-# Dashboard Plano de Ação — V6.3
+# Dashboard Plano de Ação — V6.5
 
 Atualização da V6.1 com foco na Apresentação de Resultados.
 
@@ -34,3 +34,12 @@ A V6.3 preserva os dashboards anteriores e as regras já existentes, incluindo o
 - Botão de exportação da apresentação em PNG.
 - PNG e impressão configurados no padrão 2 colunas x 4 linhas, para os 8 grupos ocuparem uma única folha A4.
 - Demais dashboards e funcionalidades preservados.
+
+
+## V6.5 — Editor simplificado da Apresentação
+- Removido o arrastar e soltar da edição, mantendo os botões de subir/descer e o seletor de grupo.
+- Editor reorganizado para evitar campos cortados e excesso de colunas.
+- Novo setor recebe automaticamente um horário de 15 minutos.
+- A sequência de novos horários parte de 09:30 e usa o último horário final existente no grupo.
+- Campos de horário utilizam passo de 15 minutos.
+- Mantidos PNG, impressão 2 x 4 e todas as demais funcionalidades.

@@ -65,7 +65,6 @@
   let state; try{const saved=localStorage.getItem(KEY)||localStorage.getItem('planoAcaoDashboardV5')||localStorage.getItem('planoAcaoDashboardV2');state=normalize(JSON.parse(saved)||{})}catch{state=clone(seed)}
   let view='mensal';
   let presentationEditing=false;
-  let presentationDrag=null;
   function save(){localStorage.setItem(KEY,JSON.stringify(state))}
   function dateBR(v){if(!v)return'';const[y,m,d]=v.split('-');return y&&m&&d?`${d}/${m}/${y}`:v}
   function cat(k){return state.categories[k]||seed.categories[k]}
@@ -84,7 +83,7 @@
     unitEditors.innerHTML=state.units.map((u,i)=>`<div class="entry" data-ui="${i}"><div class="entry-top"><input data-k="name" value="${esc(u.name)}"><button class="delete" data-del-unit="${i}" type="button">Excluir</button></div><div class="grid-inputs"><label>Previstas<input type="number" min="0" data-k="planned" value="${u.planned}"></label><label>Realizadas<input type="number" min="0" data-k="realized" value="${u.realized}"></label></div></div>`).join('');
     directorEditors.innerHTML=state.directors.map((d,di)=>`<div class="entry director-entry" data-di="${di}"><div class="entry-top"><input class="director-name" data-k="name" value="${esc(d.name)}"><button class="delete" data-del-director="${di}" type="button">Excluir</button></div><div class="director-month-inputs">${d.months.map((m,mi)=>`<div class="director-month-edit" data-dmi="${mi}"><b>${esc(m.name)}</b><div class="grid-inputs">${['rl','rp','ca','pd'].map(k=>`<label>${esc(cat(k).code)}<input type="number" min="0" data-k="${k}" value="${m[k]}"></label>`).join('')}</div></div>`).join('')}</div></div>`).join('');
     costUnitEditors.innerHTML=state.costUnits.map((u,i)=>`<div class="entry" data-cui="${i}"><div class="entry-top"><input data-k="name" value="${esc(u.name)}"><button class="delete" data-del-cost-unit="${i}" type="button">Excluir</button></div><div class="grid-inputs"><label>Ações com custo<input type="number" min="0" data-k="costActions" value="${u.costActions}"></label><label>Concluídas<input type="number" min="0" data-k="completed" value="${u.completed}"></label></div></div>`).join('');
-    presentationGroupEditors.innerHTML=state.presentationGroups.map((g,gi)=>`<div class="entry presentation-group-edit" data-pgi="${gi}"><div class="entry-top"><div class="drag-title"><span class="drag-handle group-drag" draggable="true" data-pg-drag="${gi}" title="Arraste para reordenar o grupo" aria-label="Arrastar grupo">⠿</span><div class="presentation-group-fields"><label>Nome do grupo<input data-pk="name" value="${esc(g.name)}"></label><label>Dia da apresentação<input type="date" data-pk="date" value="${esc(g.date)}"></label></div></div><div class="reorder"><button type="button" data-pg-up="${gi}" title="Mover grupo para cima">↑</button><button type="button" data-pg-down="${gi}" title="Mover grupo para baixo">↓</button></div><button class="delete" data-del-pgroup="${gi}" type="button">Excluir grupo</button></div><div class="editor-group-caption">${g.sectors.length} setor${g.sectors.length===1?'':'es'} • Edite diretamente o <b>setor</b> e o <b>horário</b>. Arraste o ⠿ para reordenar ou mudar de grupo.</div><div class="presentation-sector-table-head"><span>SETOR</span><span>HORÁRIO</span><span>DIA / GRUPO</span><span>AÇÕES</span></div><div class="presentation-sector-editors">${g.sectors.map((x,si)=>`<div class="sector-edit" data-pgi="${gi}" data-si="${si}"><span class="drag-handle sector-drag" draggable="true" data-ps-drag="${gi}:${si}" title="Arraste para reordenar ou mover de grupo" aria-label="Arrastar setor">⠿</span><label class="sector-name-field"><span>Setor</span><input data-sk="name" value="${esc(x.name)}" placeholder="Nome do setor"></label><label class="sector-time-field"><span>Horário</span><div class="time-pair"><input type="time" data-sk="start" value="${esc(x.start)}" title="Horário inicial"><b>–</b><input type="time" data-sk="end" value="${esc(x.end)}" title="Horário final"></div></label><label class="sector-move-field"><span>Dia / Grupo</span><select data-sk="move" title="Mover setor para outro grupo">${state.presentationGroups.map((target,ti)=>`<option value="${ti}" ${ti===gi?'selected':''}>${esc(target.name)} — ${dateBR(target.date)||'sem data'}</option>`).join('')}</select></label><div class="sector-actions"><div class="reorder"><button type="button" data-ps-up="${gi}:${si}" title="Mover setor para cima">↑</button><button type="button" data-ps-down="${gi}:${si}" title="Mover setor para baixo">↓</button></div><button class="delete" type="button" data-del-psector="${gi}:${si}">Excluir</button></div></div>`).join('')}</div><button class="add-inline" type="button" data-add-psector="${gi}">+ Adicionar setor</button></div>`).join('');
+    presentationGroupEditors.innerHTML=state.presentationGroups.map((g,gi)=>`<div class="entry presentation-group-edit" data-pgi="${gi}"><div class="entry-top"><div class="presentation-group-fields"><label>Nome do grupo<input data-pk="name" value="${esc(g.name)}"></label><label>Dia da apresentação<input type="date" data-pk="date" value="${esc(g.date)}"></label></div><div class="reorder"><button type="button" data-pg-up="${gi}" title="Mover grupo para cima">↑</button><button type="button" data-pg-down="${gi}" title="Mover grupo para baixo">↓</button></div><button class="delete" data-del-pgroup="${gi}" type="button">Excluir grupo</button></div><div class="editor-group-caption">${g.sectors.length} setor${g.sectors.length===1?'':'es'} • Edite o nome, horário e grupo diretamente abaixo.</div><div class="presentation-sector-table-head"><span>SETOR</span><span>HORÁRIO</span><span>GRUPO / DIA</span><span>AÇÕES</span></div><div class="presentation-sector-editors">${g.sectors.map((x,si)=>`<div class="sector-edit" data-pgi="${gi}" data-si="${si}"><label class="sector-name-field"><span>Setor</span><input data-sk="name" value="${esc(x.name)}" placeholder="Nome do setor"></label><label class="sector-time-field"><span>Horário</span><div class="time-pair"><input type="time" data-sk="start" value="${esc(x.start)}" title="Horário inicial" min="09:30" step="900"><b>–</b><input type="time" data-sk="end" value="${esc(x.end)}" title="Horário final" min="09:45" step="900"></div></label><label class="sector-move-field"><span>Grupo / Dia</span><select data-sk="move" title="Mover setor para outro grupo">${state.presentationGroups.map((target,ti)=>`<option value="${ti}" ${ti===gi?'selected':''}>${esc(target.name)} — ${dateBR(target.date)||'sem data'}</option>`).join('')}</select></label><div class="sector-actions"><div class="reorder"><button type="button" data-ps-up="${gi}:${si}" title="Mover setor para cima">↑</button><button type="button" data-ps-down="${gi}:${si}" title="Mover setor para baixo">↓</button></div><button class="delete" type="button" data-del-psector="${gi}:${si}">Excluir</button></div></div>`).join('')}</div><button class="add-inline" type="button" data-add-psector="${gi}">+ Adicionar setor</button></div>`).join('');
   }
 
   function header(title){return `<header class="hero"><div><h1>${esc(title)}</h1><p>${esc(state.subtitle)}</p></div><div class="hero-right"><b>${esc(state.period)}</b><p>Atualizado em ${dateBR(state.date)}</p></div></header>`}
@@ -205,41 +204,6 @@
     costUnitEditors.addEventListener('input',e=>{const box=e.target.closest('[data-cui]');if(!box)return;const i=+box.dataset.cui,k=e.target.dataset.k;if(!k)return;state.costUnits[i][k]=k==='name'?e.target.value:num(e.target.value);render()});
     presentationGroupEditors.addEventListener('input',e=>{const group=e.target.closest('[data-pgi]');if(!group)return;const gi=+group.dataset.pgi;if(e.target.dataset.pk){state.presentationGroups[gi][e.target.dataset.pk]=e.target.value;save();return}const sector=e.target.closest('[data-si]');if(sector&&e.target.dataset.sk&&e.target.dataset.sk!=='move'){const si=+sector.dataset.si;state.presentationGroups[gi].sectors[si][e.target.dataset.sk]=e.target.value;save()}});
     presentationGroupEditors.addEventListener('change',e=>{const sector=e.target.closest('[data-si]');if(!sector||e.target.dataset.sk!=='move')return;const [gi,si]=[+sector.dataset.pgi,+sector.dataset.si];const target=+e.target.value;if(target===gi)return;const item=state.presentationGroups[gi].sectors.splice(si,1)[0];state.presentationGroups[target].sectors.push(item);save();renderEditors();render()});
-    presentationGroupEditors.addEventListener('dragstart',e=>{
-      const gh=e.target.closest('[data-pg-drag]');
-      const sh=e.target.closest('[data-ps-drag]');
-      if(gh){presentationDrag={type:'group',from:+gh.dataset.pgDrag};e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','group');gh.closest('.presentation-group-edit')?.classList.add('dragging');return}
-      if(sh){const [gi,si]=sh.dataset.psDrag.split(':').map(Number);presentationDrag={type:'sector',fromGroup:gi,fromSector:si};e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','sector');sh.closest('.sector-edit')?.classList.add('dragging')}});
-    presentationGroupEditors.addEventListener('dragover',e=>{if(!presentationDrag)return;if(e.target.closest('.presentation-group-edit')||e.target.closest('.sector-edit')){e.preventDefault();e.dataTransfer.dropEffect='move';e.target.closest('.presentation-group-edit,.sector-edit')?.classList.add('drag-over')}});
-    presentationGroupEditors.addEventListener('dragleave',e=>{const el=e.target.closest('.presentation-group-edit,.sector-edit');if(el&&!el.contains(e.relatedTarget))el.classList.remove('drag-over')});
-    presentationGroupEditors.addEventListener('drop',e=>{
-      if(!presentationDrag)return;
-      e.preventDefault();
-      document.querySelectorAll('.dragging,.drag-over').forEach(el=>el.classList.remove('dragging','drag-over'));
-      const targetSector=e.target.closest('.sector-edit');
-      const targetGroup=e.target.closest('.presentation-group-edit');
-      const drag=presentationDrag;presentationDrag=null;
-      if(drag.type==='group'){
-        if(!targetGroup)return;
-        const from=drag.from,to=+targetGroup.dataset.pgi;if(from===to)return;
-        const [item]=state.presentationGroups.splice(from,1);state.presentationGroups.splice(to,0,item);
-      }else{
-        if(!targetGroup)return;
-        const sourceGroup=state.presentationGroups[drag.fromGroup];
-        let targetGroupIndex=+targetGroup.dataset.pgi;
-        const [item]=sourceGroup.sectors.splice(drag.fromSector,1);
-        if(drag.fromGroup<targetGroupIndex)targetGroupIndex--;
-        if(targetSector){
-          let targetSectorIndex=+targetSector.dataset.si;
-          if(drag.fromGroup===+targetGroup.dataset.pgi && drag.fromSector<targetSectorIndex)targetSectorIndex--;
-          state.presentationGroups[targetGroupIndex].sectors.splice(Math.max(0,targetSectorIndex),0,item);
-        }else{
-          state.presentationGroups[targetGroupIndex].sectors.push(item);
-        }
-      }
-      save();renderEditors();render();
-    });
-    presentationGroupEditors.addEventListener('dragend',()=>{presentationDrag=null;document.querySelectorAll('.dragging,.drag-over').forEach(el=>el.classList.remove('dragging','drag-over'))});
     savePresentation.onclick=()=>{save();presentationEditing=false;renderPresentationControls();document.body.classList.add('sidebar-collapsed');render()};
     document.addEventListener('click',e=>{
       if(e.target.dataset.exportPng!==undefined){exportPresentationPNG();return}
@@ -249,7 +213,7 @@
       if(e.target.dataset.delDirector!==undefined){state.directors.splice(+e.target.dataset.delDirector,1);renderEditors();render()}
       if(e.target.dataset.delCostUnit!==undefined){state.costUnits.splice(+e.target.dataset.delCostUnit,1);renderEditors();render()}
       if(e.target.dataset.delPgroup!==undefined){state.presentationGroups.splice(+e.target.dataset.delPgroup,1);renderEditors();render()}
-      if(e.target.dataset.addPsector!==undefined){state.presentationGroups[+e.target.dataset.addPsector].sectors.push({name:'Novo setor',start:'',end:''});renderEditors();render()}
+      if(e.target.dataset.addPsector!==undefined){const gi=+e.target.dataset.addPsector;const g=state.presentationGroups[gi];const toMinutes=t=>{if(!t||!/^\d{2}:\d{2}$/.test(t))return null;const [h,m]=t.split(':').map(Number);return h*60+m};const fromMinutes=m=>`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;let next=9*60+30;g.sectors.forEach(x=>{const end=toMinutes(x.end);if(end!==null&&end>next)next=end});const start=fromMinutes(next),end=fromMinutes(next+15);g.sectors.push({name:'Novo setor',start,end});save();renderEditors();render()}
       if(e.target.dataset.delPsector){const [gi,si]=e.target.dataset.delPsector.split(':').map(Number);state.presentationGroups[gi].sectors.splice(si,1);renderEditors();render()}
       if(e.target.dataset.pgUp!==undefined){const i=+e.target.dataset.pgUp;if(i>0){[state.presentationGroups[i-1],state.presentationGroups[i]]=[state.presentationGroups[i],state.presentationGroups[i-1]];renderEditors();render()}}
       if(e.target.dataset.pgDown!==undefined){const i=+e.target.dataset.pgDown;if(i<state.presentationGroups.length-1){[state.presentationGroups[i+1],state.presentationGroups[i]]=[state.presentationGroups[i],state.presentationGroups[i+1]];renderEditors();render()}}
