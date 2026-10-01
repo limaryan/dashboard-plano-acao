@@ -130,3 +130,13 @@ body.printing #editor,body.printing .sidebar-open,body.printing .presentation-ex
   .sector-name-field,.sector-move-field{grid-column:1/-1}
   .sector-actions{grid-column:1/-1}
 }
+
+/* V6.6 — cadastro explícito de novo setor */
+.add-sector-box{margin-top:12px;padding:12px;border:1px dashed #cbd6e4;border-radius:10px;background:#f8fafc;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}
+.add-sector-box label{margin:0!important;font-size:10px;font-weight:800;color:var(--muted)}
+.add-sector-box label span{display:block;margin-bottom:4px}
+.add-sector-box input{box-sizing:border-box;width:100%;height:36px;padding:8px 10px!important;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:var(--text);font:inherit;font-size:12px}
+.add-sector-box input:focus{outline:2px solid #b9cceb;outline-offset:1px}
+.add-sector-box .add-inline{margin:0;height:36px;white-space:nowrap;background:var(--navy);color:#fff}
+.add-sector-box small{grid-column:1/-1;color:var(--muted);font-size:10px}
+@media(max-width:700px){.add-sector-box{grid-template-columns:1fr}.add-sector-box .add-inline{width:100%}}
