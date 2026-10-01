@@ -24,3 +24,13 @@ Os cabeçalhos dos dashboards usam um verde institucional inspirado na identidad
 ## Demais dashboards
 
 A V6.3 preserva os dashboards anteriores e as regras já existentes, incluindo o comportamento N/A dos indicadores quando não houver ações aplicáveis.
+
+
+## V6.4 — Apresentação de Resultados
+- Foco desta versão: somente a tela de Apresentação de Resultados.
+- Edição dos setores e horários mantida em formato SETORES x HORÁRIO.
+- Arrastar e soltar para reordenar grupos e setores.
+- Arrastar setor para outro grupo altera automaticamente o dia associado ao grupo de destino.
+- Botão de exportação da apresentação em PNG.
+- PNG e impressão configurados no padrão 2 colunas x 4 linhas, para os 8 grupos ocuparem uma única folha A4.
+- Demais dashboards e funcionalidades preservados.

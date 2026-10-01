@@ -65,6 +65,7 @@
   let state; try{const saved=localStorage.getItem(KEY)||localStorage.getItem('planoAcaoDashboardV5')||localStorage.getItem('planoAcaoDashboardV2');state=normalize(JSON.parse(saved)||{})}catch{state=clone(seed)}
   let view='mensal';
   let presentationEditing=false;
+  let presentationDrag=null;
   function save(){localStorage.setItem(KEY,JSON.stringify(state))}
   function dateBR(v){if(!v)return'';const[y,m,d]=v.split('-');return y&&m&&d?`${d}/${m}/${y}`:v}
   function cat(k){return state.categories[k]||seed.categories[k]}
@@ -83,7 +84,7 @@
     unitEditors.innerHTML=state.units.map((u,i)=>`<div class="entry" data-ui="${i}"><div class="entry-top"><input data-k="name" value="${esc(u.name)}"><button class="delete" data-del-unit="${i}" type="button">Excluir</button></div><div class="grid-inputs"><label>Previstas<input type="number" min="0" data-k="planned" value="${u.planned}"></label><label>Realizadas<input type="number" min="0" data-k="realized" value="${u.realized}"></label></div></div>`).join('');
     directorEditors.innerHTML=state.directors.map((d,di)=>`<div class="entry director-entry" data-di="${di}"><div class="entry-top"><input class="director-name" data-k="name" value="${esc(d.name)}"><button class="delete" data-del-director="${di}" type="button">Excluir</button></div><div class="director-month-inputs">${d.months.map((m,mi)=>`<div class="director-month-edit" data-dmi="${mi}"><b>${esc(m.name)}</b><div class="grid-inputs">${['rl','rp','ca','pd'].map(k=>`<label>${esc(cat(k).code)}<input type="number" min="0" data-k="${k}" value="${m[k]}"></label>`).join('')}</div></div>`).join('')}</div></div>`).join('');
     costUnitEditors.innerHTML=state.costUnits.map((u,i)=>`<div class="entry" data-cui="${i}"><div class="entry-top"><input data-k="name" value="${esc(u.name)}"><button class="delete" data-del-cost-unit="${i}" type="button">Excluir</button></div><div class="grid-inputs"><label>Ações com custo<input type="number" min="0" data-k="costActions" value="${u.costActions}"></label><label>Concluídas<input type="number" min="0" data-k="completed" value="${u.completed}"></label></div></div>`).join('');
-    presentationGroupEditors.innerHTML=state.presentationGroups.map((g,gi)=>`<div class="entry presentation-group-edit" data-pgi="${gi}"><div class="entry-top"><div class="presentation-group-fields"><label>Nome do grupo<input data-pk="name" value="${esc(g.name)}"></label><label>Dia da apresentação<input type="date" data-pk="date" value="${esc(g.date)}"></label></div><div class="reorder"><button type="button" data-pg-up="${gi}" title="Mover grupo para cima">↑</button><button type="button" data-pg-down="${gi}" title="Mover grupo para baixo">↓</button></div><button class="delete" data-del-pgroup="${gi}" type="button">Excluir grupo</button></div><div class="editor-group-caption">${g.sectors.length} setor${g.sectors.length===1?'':'es'} • Edite diretamente o <b>setor</b> e o <b>horário</b>. O grupo e a data também são editáveis.</div><div class="presentation-sector-table-head"><span>SETOR</span><span>HORÁRIO</span><span>DIA / GRUPO</span><span>AÇÕES</span></div><div class="presentation-sector-editors">${g.sectors.map((x,si)=>`<div class="sector-edit" data-pgi="${gi}" data-si="${si}"><label class="sector-name-field"><span>Setor</span><input data-sk="name" value="${esc(x.name)}" placeholder="Nome do setor"></label><label class="sector-time-field"><span>Horário</span><div class="time-pair"><input type="time" data-sk="start" value="${esc(x.start)}" title="Horário inicial"><b>–</b><input type="time" data-sk="end" value="${esc(x.end)}" title="Horário final"></div></label><label class="sector-move-field"><span>Dia / Grupo</span><select data-sk="move" title="Mover setor para outro grupo">${state.presentationGroups.map((target,ti)=>`<option value="${ti}" ${ti===gi?'selected':''}>${esc(target.name)} — ${dateBR(target.date)||'sem data'}</option>`).join('')}</select></label><div class="sector-actions"><div class="reorder"><button type="button" data-ps-up="${gi}:${si}" title="Mover setor para cima">↑</button><button type="button" data-ps-down="${gi}:${si}" title="Mover setor para baixo">↓</button></div><button class="delete" type="button" data-del-psector="${gi}:${si}">Excluir</button></div></div>`).join('')}</div><button class="add-inline" type="button" data-add-psector="${gi}">+ Adicionar setor</button></div>`).join('');
+    presentationGroupEditors.innerHTML=state.presentationGroups.map((g,gi)=>`<div class="entry presentation-group-edit" data-pgi="${gi}"><div class="entry-top"><div class="drag-title"><span class="drag-handle group-drag" draggable="true" data-pg-drag="${gi}" title="Arraste para reordenar o grupo" aria-label="Arrastar grupo">⠿</span><div class="presentation-group-fields"><label>Nome do grupo<input data-pk="name" value="${esc(g.name)}"></label><label>Dia da apresentação<input type="date" data-pk="date" value="${esc(g.date)}"></label></div></div><div class="reorder"><button type="button" data-pg-up="${gi}" title="Mover grupo para cima">↑</button><button type="button" data-pg-down="${gi}" title="Mover grupo para baixo">↓</button></div><button class="delete" data-del-pgroup="${gi}" type="button">Excluir grupo</button></div><div class="editor-group-caption">${g.sectors.length} setor${g.sectors.length===1?'':'es'} • Edite diretamente o <b>setor</b> e o <b>horário</b>. Arraste o ⠿ para reordenar ou mudar de grupo.</div><div class="presentation-sector-table-head"><span>SETOR</span><span>HORÁRIO</span><span>DIA / GRUPO</span><span>AÇÕES</span></div><div class="presentation-sector-editors">${g.sectors.map((x,si)=>`<div class="sector-edit" data-pgi="${gi}" data-si="${si}"><span class="drag-handle sector-drag" draggable="true" data-ps-drag="${gi}:${si}" title="Arraste para reordenar ou mover de grupo" aria-label="Arrastar setor">⠿</span><label class="sector-name-field"><span>Setor</span><input data-sk="name" value="${esc(x.name)}" placeholder="Nome do setor"></label><label class="sector-time-field"><span>Horário</span><div class="time-pair"><input type="time" data-sk="start" value="${esc(x.start)}" title="Horário inicial"><b>–</b><input type="time" data-sk="end" value="${esc(x.end)}" title="Horário final"></div></label><label class="sector-move-field"><span>Dia / Grupo</span><select data-sk="move" title="Mover setor para outro grupo">${state.presentationGroups.map((target,ti)=>`<option value="${ti}" ${ti===gi?'selected':''}>${esc(target.name)} — ${dateBR(target.date)||'sem data'}</option>`).join('')}</select></label><div class="sector-actions"><div class="reorder"><button type="button" data-ps-up="${gi}:${si}" title="Mover setor para cima">↑</button><button type="button" data-ps-down="${gi}:${si}" title="Mover setor para baixo">↓</button></div><button class="delete" type="button" data-del-psector="${gi}:${si}">Excluir</button></div></div>`).join('')}</div><button class="add-inline" type="button" data-add-psector="${gi}">+ Adicionar setor</button></div>`).join('');
   }
 
   function header(title){return `<header class="hero"><div><h1>${esc(title)}</h1><p>${esc(state.subtitle)}</p></div><div class="hero-right"><b>${esc(state.period)}</b><p>Atualizado em ${dateBR(state.date)}</p></div></header>`}
@@ -104,10 +105,43 @@
   }
 
   function presentationDashboard(){
-    return `<div class="presentation-report"><div class="presentation-report-head"><div><h1>${esc(state.presentationTitle)}</h1><p>${esc(state.presentationSubtitle)}</p></div><div class="presentation-report-meta"><b>${state.presentationGroups.length} grupos</b><span>Atualizado em ${dateBR(state.date)}</span><button class="presentation-edit-btn" type="button" data-presentation-edit="1">Editar</button></div></div><div class="presentation-grid">${state.presentationGroups.map((g,gi)=>`<section class="presentation-group-card"><div class="presentation-group-head"><div><h2>${esc(g.name).toUpperCase()}</h2><strong>${dateBR(g.date)}</strong></div><span>GRUPO ${gi+1}</span></div><div class="presentation-table-head"><span>SETORES</span><span>HORÁRIO</span></div><div class="presentation-rows">${g.sectors.map(x=>`<div class="presentation-row"><span>${esc(x.name)}</span><b>${esc(x.start)} - ${esc(x.end)}</b></div>`).join('')}</div></section>`).join('')}</div></div>`;
+    return `<div class="presentation-report" id="presentationReport"><div class="presentation-report-head"><div><h1>${esc(state.presentationTitle)}</h1><p>${esc(state.presentationSubtitle)}</p></div><div class="presentation-report-meta"><b>${state.presentationGroups.length} grupos</b><span>Atualizado em ${dateBR(state.date)}</span><div class="presentation-report-actions"><button class="presentation-edit-btn" type="button" data-presentation-edit="1">Editar</button><button class="presentation-png-btn" type="button" data-export-png="1">Baixar PNG</button></div></div></div><div class="presentation-grid">${state.presentationGroups.map((g,gi)=>`<section class="presentation-group-card"><div class="presentation-group-head"><div><h2>${esc(g.name).toUpperCase()}</h2><strong>${dateBR(g.date)}</strong></div><span>GRUPO ${gi+1}</span></div><div class="presentation-table-head"><span>SETORES</span><span>HORÁRIO</span></div><div class="presentation-rows">${g.sectors.map(x=>`<div class="presentation-row"><span>${esc(x.name)}</span><b>${esc(x.start)} - ${esc(x.end)}</b></div>`).join('')}</div></section>`).join('')}</div></div>`;
   }
   function render(){dashboard.innerHTML=view==='mensal'?monthly():view==='consolidado'?consolidated():view==='sgdiretoria'?sgDiretoria():view==='custos'?costDashboard():presentationDashboard();save()}
   function bindText(id,key){$(id).addEventListener('input',e=>{state[key]=e.target.value;render()})}
+
+  async function exportPresentationPNG(){
+    if(view!=='apresentacao')return;
+    const errors=[];
+    state.presentationGroups.forEach((g,gi)=>{
+      if(!g.date)errors.push(`Grupo ${gi+1}: informe a data.`);
+      if(!g.sectors.length)errors.push(`Grupo ${gi+1}: adicione pelo menos um setor.`);
+      g.sectors.forEach((x,si)=>{
+        if(!x.name.trim())errors.push(`Grupo ${gi+1}, setor ${si+1}: informe o nome.`);
+        if(!x.start||!x.end)errors.push(`Grupo ${gi+1}, setor ${si+1}: informe os dois horários.`);
+        if(x.start&&x.end&&x.end<x.start)errors.push(`Grupo ${gi+1}, setor ${si+1}: o horário final não pode ser anterior ao inicial.`);
+      });
+    });
+    if(errors.length){alert('Corrija antes de exportar o PNG:\n\n'+errors.join('\n'));return}
+    if(typeof html2canvas==='undefined'){alert('Não foi possível carregar o exportador PNG. Verifique sua conexão e tente novamente.');return}
+    const source=document.getElementById('presentationReport');
+    if(!source)return;
+    const clone=source.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.classList.add('png-export-sheet');
+    clone.querySelectorAll('.presentation-report-actions').forEach(el=>el.remove());
+    const host=document.createElement('div');
+    host.className='png-export-host';
+    host.appendChild(clone);
+    document.body.appendChild(host);
+    try{
+      const canvas=await html2canvas(clone,{backgroundColor:'#fff',scale:2,useCORS:true,logging:false,width:794,height:1123,windowWidth:794});
+      const a=document.createElement('a');
+      a.download='apresentacao-de-resultados.png';
+      a.href=canvas.toDataURL('image/png');
+      a.click();
+    }finally{host.remove()}
+  }
 
   function exportExcelFile(){
     if(typeof XLSX==='undefined'){alert('Não foi possível carregar o gerador de Excel. Verifique sua conexão e tente novamente.');return}
@@ -169,10 +203,46 @@
     unitEditors.addEventListener('input',e=>{const box=e.target.closest('[data-ui]');if(!box)return;const k=e.target.dataset.k,i=+box.dataset.ui;state.units[i][k]=k==='name'?e.target.value:num(e.target.value);render()});
     directorEditors.addEventListener('input',e=>{const box=e.target.closest('[data-di]');if(!box)return;const di=+box.dataset.di,k=e.target.dataset.k;if(k==='name'){state.directors[di].name=e.target.value;render();return}const mb=e.target.closest('[data-dmi]');if(mb&&k){state.directors[di].months[+mb.dataset.dmi][k]=num(e.target.value);render()}});
     costUnitEditors.addEventListener('input',e=>{const box=e.target.closest('[data-cui]');if(!box)return;const i=+box.dataset.cui,k=e.target.dataset.k;if(!k)return;state.costUnits[i][k]=k==='name'?e.target.value:num(e.target.value);render()});
-    presentationGroupEditors.addEventListener('input',e=>{const group=e.target.closest('[data-pgi]');if(!group)return;const gi=+group.dataset.pgi;if(e.target.dataset.pk){state.presentationGroups[gi][e.target.dataset.pk]=e.target.value;render();return}const sector=e.target.closest('[data-si]');if(sector&&e.target.dataset.sk&&e.target.dataset.sk!=='move'){const si=+sector.dataset.si;state.presentationGroups[gi].sectors[si][e.target.dataset.sk]=e.target.value;render()}});
-    presentationGroupEditors.addEventListener('change',e=>{const sector=e.target.closest('[data-si]');if(!sector||e.target.dataset.sk!=='move')return;const [gi,si]=[+sector.dataset.pgi,+sector.dataset.si];const target=+e.target.value;if(target===gi)return;const item=state.presentationGroups[gi].sectors.splice(si,1)[0];state.presentationGroups[target].sectors.push(item);renderEditors();render()});
+    presentationGroupEditors.addEventListener('input',e=>{const group=e.target.closest('[data-pgi]');if(!group)return;const gi=+group.dataset.pgi;if(e.target.dataset.pk){state.presentationGroups[gi][e.target.dataset.pk]=e.target.value;save();return}const sector=e.target.closest('[data-si]');if(sector&&e.target.dataset.sk&&e.target.dataset.sk!=='move'){const si=+sector.dataset.si;state.presentationGroups[gi].sectors[si][e.target.dataset.sk]=e.target.value;save()}});
+    presentationGroupEditors.addEventListener('change',e=>{const sector=e.target.closest('[data-si]');if(!sector||e.target.dataset.sk!=='move')return;const [gi,si]=[+sector.dataset.pgi,+sector.dataset.si];const target=+e.target.value;if(target===gi)return;const item=state.presentationGroups[gi].sectors.splice(si,1)[0];state.presentationGroups[target].sectors.push(item);save();renderEditors();render()});
+    presentationGroupEditors.addEventListener('dragstart',e=>{
+      const gh=e.target.closest('[data-pg-drag]');
+      const sh=e.target.closest('[data-ps-drag]');
+      if(gh){presentationDrag={type:'group',from:+gh.dataset.pgDrag};e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','group');gh.closest('.presentation-group-edit')?.classList.add('dragging');return}
+      if(sh){const [gi,si]=sh.dataset.psDrag.split(':').map(Number);presentationDrag={type:'sector',fromGroup:gi,fromSector:si};e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain','sector');sh.closest('.sector-edit')?.classList.add('dragging')}});
+    presentationGroupEditors.addEventListener('dragover',e=>{if(!presentationDrag)return;if(e.target.closest('.presentation-group-edit')||e.target.closest('.sector-edit')){e.preventDefault();e.dataTransfer.dropEffect='move';e.target.closest('.presentation-group-edit,.sector-edit')?.classList.add('drag-over')}});
+    presentationGroupEditors.addEventListener('dragleave',e=>{const el=e.target.closest('.presentation-group-edit,.sector-edit');if(el&&!el.contains(e.relatedTarget))el.classList.remove('drag-over')});
+    presentationGroupEditors.addEventListener('drop',e=>{
+      if(!presentationDrag)return;
+      e.preventDefault();
+      document.querySelectorAll('.dragging,.drag-over').forEach(el=>el.classList.remove('dragging','drag-over'));
+      const targetSector=e.target.closest('.sector-edit');
+      const targetGroup=e.target.closest('.presentation-group-edit');
+      const drag=presentationDrag;presentationDrag=null;
+      if(drag.type==='group'){
+        if(!targetGroup)return;
+        const from=drag.from,to=+targetGroup.dataset.pgi;if(from===to)return;
+        const [item]=state.presentationGroups.splice(from,1);state.presentationGroups.splice(to,0,item);
+      }else{
+        if(!targetGroup)return;
+        const sourceGroup=state.presentationGroups[drag.fromGroup];
+        let targetGroupIndex=+targetGroup.dataset.pgi;
+        const [item]=sourceGroup.sectors.splice(drag.fromSector,1);
+        if(drag.fromGroup<targetGroupIndex)targetGroupIndex--;
+        if(targetSector){
+          let targetSectorIndex=+targetSector.dataset.si;
+          if(drag.fromGroup===+targetGroup.dataset.pgi && drag.fromSector<targetSectorIndex)targetSectorIndex--;
+          state.presentationGroups[targetGroupIndex].sectors.splice(Math.max(0,targetSectorIndex),0,item);
+        }else{
+          state.presentationGroups[targetGroupIndex].sectors.push(item);
+        }
+      }
+      save();renderEditors();render();
+    });
+    presentationGroupEditors.addEventListener('dragend',()=>{presentationDrag=null;document.querySelectorAll('.dragging,.drag-over').forEach(el=>el.classList.remove('dragging','drag-over'))});
     savePresentation.onclick=()=>{save();presentationEditing=false;renderPresentationControls();document.body.classList.add('sidebar-collapsed');render()};
     document.addEventListener('click',e=>{
+      if(e.target.dataset.exportPng!==undefined){exportPresentationPNG();return}
       if(e.target.dataset.presentationEdit!==undefined){presentationEditing=true;renderPresentationControls();document.body.classList.remove('sidebar-collapsed');renderEditors();render();const ed=document.querySelector('.editor');if(ed)ed.scrollTo({top:0,behavior:'smooth'});return}
       if(e.target.dataset.delMonth!==undefined){state.months.splice(+e.target.dataset.delMonth,1);syncDirectorMonths();renderEditors();render()}
       if(e.target.dataset.delUnit!==undefined){state.units.splice(+e.target.dataset.delUnit,1);renderEditors();render()}
@@ -216,7 +286,7 @@
       }
       window.print();
     };
-    exportJson.onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dados-dashboard-v6.2.json';a.click();URL.revokeObjectURL(a.href)};
+    exportJson.onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dados-dashboard-v6.4.json';a.click();URL.revokeObjectURL(a.href)};
     importJson.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=normalize(JSON.parse(r.result));renderEditors();render()}catch{alert('Arquivo JSON inválido.')}};r.readAsText(f)};
     reset.onclick=()=>{if(confirm('Zerar todos os valores numéricos? Meses, nomes, diretorias, superintendências e textos serão mantidos.')){zeroValues();renderEditors();render()}};
     const setSidebar=collapsed=>document.body.classList.toggle('sidebar-collapsed',collapsed);
