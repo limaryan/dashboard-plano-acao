@@ -142,53 +142,80 @@ body.printing #editor,body.printing .sidebar-open,body.printing .presentation-ex
 @media(max-width:700px){.add-sector-box{grid-template-columns:1fr}.add-sector-box .add-inline{width:100%}}
 
 
-/* V6.7 — relatório 2 x 4 com tabelas uniformes e leitura maior */
-.presentation-group-card{
-  display:grid;
-  grid-template-rows:auto auto minmax(0,1fr);
-  min-height:0;
-}
-.presentation-rows{
-  display:grid;
-  grid-template-rows:repeat(var(--max-sector-rows,10),minmax(0,1fr));
-  min-height:0;
-  overflow:hidden;
-  padding-bottom:0;
-}
-.presentation-row{
-  min-height:0;
-  padding:0 0;
-  font-size:11.5px;
-  line-height:1.15;
-}
-.presentation-row b{font-size:10.5px}
-.presentation-row span,.presentation-row b{
+/* V6.7.1 — ajuste visual da Apresentação de Resultados.
+   Somente CSS: preserva integralmente a lógica e a edição da V6.6.
+   As tabelas usam 10 linhas de referência para manter os 8 cartões uniformes no 2 x 4.
+*/
+.presentation-grid .presentation-group-card{
   display:flex;
-  align-items:center;
+  flex-direction:column;
   min-height:0;
 }
+.presentation-grid .presentation-rows{
+  flex:1 1 auto;
+  min-height:0;
+  display:grid;
+  grid-template-rows:repeat(10,minmax(0,1fr));
+  align-content:stretch;
+}
+.presentation-grid .presentation-row{
+  min-height:0;
+  display:grid;
+  align-items:center;
+  border-bottom:1px solid #e7edf4;
+  font-size:8.2px;
+  line-height:1.1;
+  padding:0;
+}
+.presentation-grid .presentation-row:last-child{border-bottom:0}
+.presentation-grid .presentation-row b{font-size:7.8px;white-space:nowrap}
+.presentation-grid .presentation-table-head{font-size:8px}
 
-/* Folha PNG A4 — linhas maiores e proporcionais ao espaço disponível. */
+/* PNG A4: 2 x 4 com linhas visualmente iguais e tipografia maior. */
+.png-export-sheet .presentation-group-card{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
 .png-export-sheet .presentation-rows{
-  grid-template-rows:repeat(var(--max-sector-rows,10),minmax(0,1fr));
-  padding:0 7px;
+  flex:1 1 auto;
+  min-height:0;
+  display:grid;
+  grid-template-rows:repeat(10,minmax(0,1fr));
 }
 .png-export-sheet .presentation-row{
+  min-height:0;
+  display:grid;
+  align-items:center;
+  border-bottom:1px solid #e3e9f0;
   padding:0;
-  font-size:8.4px;
-  line-height:1.1;
+  font-size:7.8px;
+  line-height:1.08;
 }
-.png-export-sheet .presentation-row b{font-size:8px}
+.png-export-sheet .presentation-row b{font-size:7.4px;white-space:nowrap}
+.png-export-sheet .presentation-table-head{font-size:7.2px}
 
 @media print{
-  .presentation-rows{
-    grid-template-rows:repeat(var(--max-sector-rows,10),minmax(0,1fr));
-    padding:0 2mm 0;
+  .presentation-report .presentation-group-card{
+    display:flex;
+    flex-direction:column;
+    min-height:0;
   }
-  .presentation-row{
+  .presentation-report .presentation-rows{
+    flex:1 1 auto;
+    min-height:0;
+    display:grid;
+    grid-template-rows:repeat(10,minmax(0,1fr));
+  }
+  .presentation-report .presentation-row{
+    min-height:0;
+    display:grid;
+    align-items:center;
+    border-bottom:.25mm solid #e3e9f0;
     padding:0;
     font-size:7.2px;
     line-height:1.05;
   }
-  .presentation-row b{font-size:6.7px}
+  .presentation-report .presentation-row b{font-size:6.9px;white-space:nowrap}
+  .presentation-report .presentation-table-head{font-size:6.8px}
 }
