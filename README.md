@@ -1,51 +1,29 @@
-# Dashboard Plano de Ação — V6.7.1
+# Dashboard Plano de Ação — V6.8
 
-Atualização da V6.1 com foco na Apresentação de Resultados.
+Versão de teste com a nova funcionalidade **Teste previstos**, voltada à leitura automática da planilha do Plano de Ação.
 
-## Apresentação de Resultados
+## Teste previstos
 
-- A visualização abre em modo relatório, sem a barra lateral de edição.
-- O botão **Editar** no cabeçalho abre o editor.
-- O editor tem barra lateral ampliada.
-- Nome do grupo e data são editáveis.
-- Nome de cada setor é editável.
-- Horário inicial e final são editáveis.
-- Cada setor pode ser movido para qualquer outro grupo/dia pelo campo **Dia / Grupo**.
-- Setores podem ser adicionados e excluídos.
-- Grupos podem ser adicionados, excluídos e reordenados.
-- Setores podem ser reordenados dentro do grupo.
-- **Salvar e visualizar** fecha a edição e retorna ao relatório pronto.
-- A apresentação pode ser impressa ou salva em PDF pelo navegador.
+- Importação de `.xls`, `.xlsx` e CSV compatível.
+- Leitura automática das colunas:
+  - F — Superveniência
+  - K — Prazo
+  - L — Reprogramação
+  - M — Data Real
+  - N — Status
+- Filtro por mês, ano ou período personalizado.
+- Filtro por superintendência.
+- Filtro de situação para a tabela detalhada.
+- Cálculo automático de Previstas, Realizadas, Reprogramadas, Pendentes e Canceladas.
+- Regra temporal baseada no Prazo original:
+  - ação com prazo no período e Data Real até o fim do período = realizada;
+  - conclusão antes do prazo também conta como realizada no mês do prazo;
+  - conclusão alguns dias depois do prazo, mas até o fim do período, também conta como realizada;
+  - sem Data Real e com Reprogramação = reprogramada;
+  - sem Data Real/Reprogramação = pendente;
+  - Status de cancelamento = cancelada.
+- Ações com múltiplas superintendências aparecem em cada superintendência no detalhamento, mas são contadas uma única vez no total geral.
+- Exportação do resultado filtrado para Excel.
+- Impressão/PDF do relatório automático.
 
-## Identidade visual
-
-Os cabeçalhos dos dashboards usam um verde institucional inspirado na identidade visual atual do IMIP.
-
-## Demais dashboards
-
-A V6.3 preserva os dashboards anteriores e as regras já existentes, incluindo o comportamento N/A dos indicadores quando não houver ações aplicáveis.
-
-
-## V6.4 — Apresentação de Resultados
-- Foco desta versão: somente a tela de Apresentação de Resultados.
-- Edição dos setores e horários mantida em formato SETORES x HORÁRIO.
-- Arrastar e soltar para reordenar grupos e setores.
-- Arrastar setor para outro grupo altera automaticamente o dia associado ao grupo de destino.
-- Botão de exportação da apresentação em PNG.
-- PNG e impressão configurados no padrão 2 colunas x 4 linhas, para os 8 grupos ocuparem uma única folha A4.
-- Demais dashboards e funcionalidades preservados.
-
-
-## V6.7.1 — Editor simplificado da Apresentação
-- Removido o arrastar e soltar da edição, mantendo os botões de subir/descer e o seletor de grupo.
-- Editor reorganizado para evitar campos cortados e excesso de colunas.
-- Novo setor recebe automaticamente um horário de 15 minutos.
-- A sequência de novos horários parte de 09:30 e usa o último horário final existente no grupo.
-- Campos de horário utilizam passo de 15 minutos.
-- Mantidos PNG, impressão 2 x 4 e todas as demais funcionalidades.
-
-
-## V6.7.1
-- Adicionado campo explícito para informar o nome do novo setor antes de adicioná-lo.
-- Horário do novo setor continua automático em blocos de 15 minutos.
-- Mantida a remoção do arrastar e soltar.
+As funcionalidades anteriores do dashboard foram preservadas.

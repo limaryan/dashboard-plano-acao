@@ -35,7 +35,7 @@
     consolidatedSectionTitle:'CONCLUSÃO POR SUPERINTENDÊNCIA', overviewLabel:'VISÃO GERAL', consolidatedHeading:'Execução consolidada do período',
     costSectionTitle:'AÇÕES COM CUSTO POR SUPERINTENDÊNCIA',
     projectTotal:0, realizedUntilPeriod:0, costProjectTotal:0, costTotal:0, costCompleted:0,
-    presentationTitle:'APRESENTAÇÃO DE RESULTADOS', presentationSubtitle:'Cronograma de apresentação dos resultados', presentationGroups:presentationGroupsSeed(),
+    presentationTitle:'APRESENTAÇÃO DE RESULTADOS', presentationSubtitle:'Cronograma de apresentação dos resultados', automaticTitle:'Teste previstos', presentationGroups:presentationGroupsSeed(),
     categories:{rl:{code:'RL',name:'Realizadas'},rp:{code:'RP',name:'Reprogramadas'},ca:{code:'CA',name:'Canceladas'},pd:{code:'PD',name:'Pendentes'}},
     months:emptyMonths(),
     units:['SG','SAF','SAS','SO','SEPI'].map(name=>({name,planned:0,realized:0})),
@@ -65,12 +65,89 @@
   let state; try{const saved=localStorage.getItem(KEY)||localStorage.getItem('planoAcaoDashboardV5')||localStorage.getItem('planoAcaoDashboardV2');state=normalize(JSON.parse(saved)||{})}catch{state=clone(seed)}
   let view='mensal';
   let presentationEditing=false;
+  let automaticRows=[];
+  let automaticMeta={fileName:'',loadedAt:'',minDate:null,maxDate:null};
   function save(){localStorage.setItem(KEY,JSON.stringify(state))}
   function dateBR(v){if(!v)return'';const[y,m,d]=v.split('-');return y&&m&&d?`${d}/${m}/${y}`:v}
   function cat(k){return state.categories[k]||seed.categories[k]}
   function formula(){return `PV = ${['rl','rp','ca','pd'].map(k=>esc(cat(k).code)).join(' + ')}`}
   function syncDirectorMonths(){state.directors.forEach(d=>{const old=d.months||[];d.months=state.months.map((m,i)=>{const x=old[i]||{};return {name:m.name,rl:num(x.rl),rp:num(x.rp),ca:num(x.ca),pd:num(x.pd)}})})}
 
+  function normalizeHeader(v){return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,' ').trim().toLowerCase()}
+  function parseBRDate(v){
+    if(v===null||v===undefined||v==='')return null;
+    if(v instanceof Date&&!isNaN(v))return new Date(v.getFullYear(),v.getMonth(),v.getDate(),12);
+    const s=String(v).trim(); if(!s||s==='-')return null;
+    const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/); if(!m)return null;
+    let y=Number(m[3]); if(y<100)y+=2000; const d=new Date(y,Number(m[2])-1,Number(m[1]),12);
+    return d.getFullYear()===y&&d.getMonth()===Number(m[2])-1&&d.getDate()===Number(m[1])?d:null;
+  }
+  function isoDate(d){return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:''}
+  function brDate(d){return d?`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`:''}
+  function endOfMonth(y,m){return new Date(y,m,0,12)}
+  function getAutomaticPeriod(){
+    const mode=$('#autoPeriodMode')?.value||'month';
+    if(mode==='year'){const y=Number($('#autoYear')?.value)||2026;return {start:new Date(y,0,1,12),end:new Date(y,11,31,12),label:String(y)}}
+    if(mode==='custom'){const a=parseBRDate($('#autoStart')?.value?.split('-').reverse().join('/'));const b=parseBRDate($('#autoEnd')?.value?.split('-').reverse().join('/'));return {start:a||new Date(2026,2,1,12),end:b||new Date(2026,2,31,12),label:`${brDate(a||new Date(2026,2,1,12))} a ${brDate(b||new Date(2026,2,31,12))}`}}
+    const raw=$('#autoMonth')?.value||'2026-03';const [y,m]=raw.split('-').map(Number);const start=new Date(y,m-1,1,12);return {start,end:endOfMonth(y,m),label:start.toLocaleDateString('pt-BR',{month:'long',year:'numeric'})};
+  }
+  function classifyAutomatic(row,start,end){
+    const prazo=row.prazo; if(!prazo||prazo<start||prazo>end)return null;
+    const status=String(row.status||'').toUpperCase();
+    if(status.includes('CANCELADA'))return 'ca';
+    // A ação é considerada realizada no mês do prazo original quando sua Data Real
+    // ocorreu até o fim do período, inclusive antes do prazo original.
+    if(row.real&&row.real<=end)return 'rl';
+    if(row.reprog)return 'rp';
+    return 'pd';
+  }
+  function automaticFilteredRows(){
+    const p=getAutomaticPeriod(); const sup=$('#autoSuper')?.value||'__ALL__';
+    return automaticRows.map(r=>({...r,classification:classifyAutomatic(r,p.start,p.end)})).filter(r=>r.classification&&(sup==='__ALL__'||r.supers.includes(sup)));
+  }
+  function automaticCounts(rows){return rows.reduce((a,r)=>(a[r.classification]++,a),{rl:0,rp:0,ca:0,pd:0})}
+  function automaticSuperNames(){const set=new Set();automaticRows.forEach(r=>r.supers.forEach(x=>set.add(x)));return [...set].sort((a,b)=>a.localeCompare(b,'pt-BR'))}
+  function refreshAutomaticControls(){
+    const sup=$('#autoSuper'), year=$('#autoYear'); if(!sup||!year)return;
+    const currentSup=sup.value, currentYear=year.value;
+    sup.innerHTML='<option value="__ALL__">Todas</option>'+automaticSuperNames().map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join(''); if([...sup.options].some(o=>o.value===currentSup))sup.value=currentSup;
+    const years=new Set(); automaticRows.forEach(r=>{if(r.prazo)years.add(r.prazo.getFullYear())}); const ys=[...years].sort((a,b)=>a-b); year.innerHTML=ys.map(y=>`<option value="${y}">${y}</option>`).join(''); if(ys.includes(Number(currentYear)))year.value=currentYear; else if(ys.length)year.value=ys[0];
+    const min=automaticRows.reduce((v,r)=>r.prazo&&(!v||r.prazo<v)?r.prazo:v,null), max=automaticRows.reduce((v,r)=>r.prazo&&(!v||r.prazo>v)?r.prazo:v,null); automaticMeta.minDate=min;automaticMeta.maxDate=max;
+    if(min&&max){$('#autoMonth').min=`${min.getFullYear()}-${String(min.getMonth()+1).padStart(2,'0')}`;$('#autoMonth').max=`${max.getFullYear()}-${String(max.getMonth()+1).padStart(2,'0')}`;$('#autoStart').min=isoDate(min);$('#autoStart').max=isoDate(max);$('#autoEnd').min=isoDate(min);$('#autoEnd').max=isoDate(max)}
+    $('#automaticFileStatus').textContent=automaticRows.length?`✓ ${automaticRows.length.toLocaleString('pt-BR')} ações carregadas • ${automaticMeta.fileName}`:'Nenhuma planilha carregada.';
+  }
+  function syncAutomaticModeControls(){
+    const mode=$('#autoPeriodMode')?.value||'month';$('#autoMonthWrap').hidden=mode!=='month';$('#autoYearWrap').hidden=mode!=='year';$('#autoStartWrap').hidden=mode!=='custom';$('#autoEndWrap').hidden=mode!=='custom';
+  }
+  function automaticDashboard(){
+    const p=getAutomaticPeriod(); const rows=automaticFilteredRows(); const c=automaticCounts(rows); const pv=c.rl+c.rp+c.ca+c.pd; const pct=pv?Calc.pct(c.rl,pv):null;
+    const selectedStatus=$('#autoStatus')?.value||'__ALL__'; const detailRows=selectedStatus==='__ALL__'?rows:rows.filter(r=>r.classification===selectedStatus);
+    const supNames=automaticSuperNames();
+    const bySup=supNames.map(sup=>{const sr=rows.filter(r=>r.supers.includes(sup));const sc=automaticCounts(sr);const sp=sc.rl+sc.rp+sc.ca+sc.pd;return {sup,...sc,pv:sp,pct:sp?Calc.pct(sc.rl,sp):null}});
+    const statusLabel={rl:'Realizadas',rp:'Reprogramadas',pd:'Pendentes',ca:'Canceladas'};
+    return `<div class="automatic-report"><header class="hero"><div><h1>${esc(state.automaticTitle||'Teste previstos')}</h1><p>Leitura automática do Plano de Ação</p></div><div class="hero-right"><b>${esc(p.label)}</b><p>${automaticRows.length?esc(automaticMeta.fileName):'Importe a planilha para iniciar'}</p></div></header><div class="content"><div class="automatic-summary"><div class="card auto-kpi"><span>PREVISTAS</span><b>${pv.toLocaleString('pt-BR')}</b></div><div class="card auto-kpi green"><span>REALIZADAS</span><b>${c.rl.toLocaleString('pt-BR')}</b></div><div class="card auto-kpi blue"><span>REPROGRAMADAS</span><b>${c.rp.toLocaleString('pt-BR')}</b></div><div class="card auto-kpi red"><span>PENDENTES</span><b>${c.pd.toLocaleString('pt-BR')}</b></div><div class="card auto-kpi yellow"><span>CANCELADAS</span><b>${c.ca.toLocaleString('pt-BR')}</b></div><div class="card auto-execution"><span>EXECUÇÃO</span>${UI.donut(pct,'CONCLUSÃO')}</div></div><h2 class="section-title">POR SUPERINTENDÊNCIA</h2><div class="automatic-super-table"><div class="auto-table-row auto-table-head"><b>SUPERINTENDÊNCIA</b><b>PREVISTAS</b><b>REALIZADAS</b><b>REPROGRAM.</b><b>PENDENTES</b><b>CANCELADAS</b><b>EXECUÇÃO</b></div>${bySup.map(x=>`<div class="auto-table-row"><span>${esc(x.sup)}</span><b>${x.pv}</b><b class="green-text">${x.rl}</b><b class="blue-text">${x.rp}</b><b class="red-text">${x.pd}</b><b class="yellow-text">${x.ca}</b><b>${x.pct===null?'N/A':x.pct+'%'}</b></div>`).join('')}</div><p class="muted auto-note">A ação é vinculada ao mês pelo <b>Prazo (coluna K)</b>. Se houver Data Real (M) até o fim do período, ela conta como realizada — inclusive quando concluída antes do prazo ou alguns dias depois. Sem Data Real, Reprogramação (L) classifica como reprogramada; cancelamentos seguem o Status (N). Ações compartilhadas entre superintendências aparecem em cada superintendência, mas no total geral são contadas uma única vez.</p><h2 class="section-title">AÇÕES DO PERÍODO <span class="auto-detail-count">${detailRows.length.toLocaleString('pt-BR')} registros</span></h2><div class="automatic-detail"><div class="auto-table-row auto-table-head"><b>CÓDIGO</b><b>SUPERINTENDÊNCIA</b><b>PRAZO</b><b>REPROGRAMAÇÃO</b><b>DATA REAL</b><b>SITUAÇÃO</b></div>${detailRows.map(r=>`<div class="auto-table-row"><span>${esc(r.codigo)}</span><span>${esc(r.supers.join(', '))}</span><span>${brDate(r.prazo)}</span><span>${brDate(r.reprog)||'—'}</span><span>${brDate(r.real)||'—'}</span><b class="${r.classification}-text">${statusLabel[r.classification]}</b></div>`).join('')}</div></div></div>`;
+  }
+  async function importAutomaticFile(file){
+    if(!file)return;
+    try{
+      if(typeof XLSX==='undefined')throw new Error('Biblioteca Excel indisponível.');
+      const buf=await file.arrayBuffer(); let wb;
+      const probeUtf= new TextDecoder('utf-8').decode(buf.slice(0,2048));
+      const probe1252= new TextDecoder('windows-1252').decode(buf.slice(0,2048));
+      const htmlProbe=/<(?:html|table|!doctype)/i.test(probeUtf)||/<(?:html|table|!doctype)/i.test(probe1252);
+      if(htmlProbe){
+        const text=probe1252+new TextDecoder('windows-1252').decode(buf.slice(2048)); const doc=new DOMParser().parseFromString(text,'text/html'); const table=doc.querySelector('table'); if(!table)throw new Error('Arquivo HTML sem tabela.'); wb=XLSX.utils.book_new();const ws=XLSX.utils.table_to_sheet(table);XLSX.utils.book_append_sheet(wb,ws,'Plano');
+      }else{
+        wb=XLSX.read(buf,{type:'array',cellDates:true,raw:true});
+      }
+      const ws=wb.Sheets[wb.SheetNames[0]]; const raw=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true}); if(!raw.length)throw new Error('A planilha não possui linhas de dados.');
+      const headers=Object.keys(raw[0]); const find=(names,fallback)=>{const wanted=names.map(normalizeHeader);const found=headers.find(h=>wanted.includes(normalizeHeader(h)));return found||headers[fallback]};
+      const cols={codigo:find(['Código','Codigo'],0),sup:find(['Superveniência','Superveniencia'],5),prazo:find(['Prazo'],10),reprog:find(['Reprogramação','Reprogramacao'],11),real:find(['Data Real'],12),status:find(['Status'],13)};
+      if(!cols.sup||!cols.prazo||!cols.reprog||!cols.real||!cols.status)throw new Error('Não foi possível localizar as colunas F e K:N da planilha.');
+      automaticRows=raw.map((r,i)=>{const supText=String(r[cols.sup]??'').trim();return {codigo:String(r[cols.codigo]??i+1),supers:supText.split(',').map(x=>x.trim().toUpperCase()).filter(Boolean),prazo:parseBRDate(r[cols.prazo]),reprog:parseBRDate(r[cols.reprog]),real:parseBRDate(r[cols.real]),status:String(r[cols.status]??'').trim()}}).filter(r=>r.prazo);
+      automaticMeta.fileName=file.name;automaticMeta.loadedAt=new Date().toISOString();refreshAutomaticControls();render();
+    }catch(err){alert(`Não foi possível ler a planilha.\n\n${err.message||err}`)}
+  }
   function renderEditors(){
     monthlyTitleInput.value=state.monthlyTitle; consolidatedTitleInput.value=state.consolidatedTitle; costTitleInput.value=state.costTitle;
     subtitleInput.value=state.subtitle; periodInput.value=state.period; dateInput.value=state.date;
@@ -78,6 +155,7 @@
     consolidatedSectionTitleInput.value=state.consolidatedSectionTitle; overviewLabelInput.value=state.overviewLabel; consolidatedHeadingInput.value=state.consolidatedHeading;
     costSectionTitleInput.value=state.costSectionTitle; projectTotal.value=state.projectTotal; realizedUntilPeriod.value=state.realizedUntilPeriod; costProjectTotal.value=state.costProjectTotal; costTotal.value=state.costTotal; costCompleted.value=state.costCompleted;
     presentationTitleInput.value=state.presentationTitle; presentationSubtitleInput.value=state.presentationSubtitle;
+    if(typeof automaticTitleInput!=='undefined' && automaticTitleInput) automaticTitleInput.value=state.automaticTitle||'Teste previstos';
     categoryEditors.innerHTML=['rl','rp','ca','pd'].map(k=>`<div class="category-entry" data-cat="${k}"><span class="swatch ${k}"></span><label>Sigla<input data-k="code" maxlength="8" value="${esc(cat(k).code)}"></label><label>Nome<input data-k="name" value="${esc(cat(k).name)}"></label></div>`).join('');
     monthEditors.innerHTML=state.months.map((m,i)=>`<div class="entry" data-mi="${i}"><div class="entry-top"><input data-k="name" value="${esc(m.name)}"><button class="delete" data-del-month="${i}" type="button">Excluir</button></div><div class="grid-inputs">${['rl','rp','ca','pd'].map(k=>`<label>${esc(cat(k).code)}<input type="number" min="0" data-k="${k}" value="${m[k]}"></label>`).join('')}</div></div>`).join('');
     unitEditors.innerHTML=state.units.map((u,i)=>`<div class="entry" data-ui="${i}"><div class="entry-top"><input data-k="name" value="${esc(u.name)}"><button class="delete" data-del-unit="${i}" type="button">Excluir</button></div><div class="grid-inputs"><label>Previstas<input type="number" min="0" data-k="planned" value="${u.planned}"></label><label>Realizadas<input type="number" min="0" data-k="realized" value="${u.realized}"></label></div></div>`).join('');
@@ -106,7 +184,7 @@
   function presentationDashboard(){
     return `<div class="presentation-report" id="presentationReport"><div class="presentation-report-head"><div><h1>${esc(state.presentationTitle)}</h1><p>${esc(state.presentationSubtitle)}</p></div><div class="presentation-report-meta"><b>${state.presentationGroups.length} grupos</b><span>Atualizado em ${dateBR(state.date)}</span><div class="presentation-report-actions"><button class="presentation-edit-btn" type="button" data-presentation-edit="1">Editar</button><button class="presentation-png-btn" type="button" data-export-png="1">Baixar PNG</button></div></div></div><div class="presentation-grid">${state.presentationGroups.map((g,gi)=>`<section class="presentation-group-card"><div class="presentation-group-head"><div><h2>${esc(g.name).toUpperCase()}</h2><strong>${dateBR(g.date)}</strong></div><span>GRUPO ${gi+1}</span></div><div class="presentation-table-head"><span>SETORES</span><span>HORÁRIO</span></div><div class="presentation-rows">${g.sectors.map(x=>`<div class="presentation-row"><span>${esc(x.name)}</span><b>${esc(x.start)} - ${esc(x.end)}</b></div>`).join('')}</div></section>`).join('')}</div></div>`;
   }
-  function render(){dashboard.innerHTML=view==='mensal'?monthly():view==='consolidado'?consolidated():view==='sgdiretoria'?sgDiretoria():view==='custos'?costDashboard():presentationDashboard();save()}
+  function render(){dashboard.innerHTML=view==='mensal'?monthly():view==='consolidado'?consolidated():view==='sgdiretoria'?sgDiretoria():view==='custos'?costDashboard():view==='apresentacao'?presentationDashboard():automaticDashboard();save()}
   function bindText(id,key){$(id).addEventListener('input',e=>{state[key]=e.target.value;render()})}
 
   async function exportPresentationPNG(){
@@ -157,6 +235,19 @@
     const d=state.date||new Date().toISOString().slice(0,10);XLSX.writeFile(wb,`Dashboard_Plano_de_Acao_${d}.xlsx`);
   }
 
+  function exportAutomaticExcel(){
+    if(!automaticRows.length){alert('Importe uma planilha primeiro.');return}
+    if(typeof XLSX==='undefined'){alert('Não foi possível carregar o gerador de Excel.');return}
+    const p=getAutomaticPeriod(), rows=automaticFilteredRows(), selectedStatus=$('#autoStatus')?.value||'__ALL__';
+    const detail=selectedStatus==='__ALL__'?rows:rows.filter(r=>r.classification===selectedStatus); const c=automaticCounts(rows), pv=c.rl+c.rp+c.ca+c.pd;
+    const wb=XLSX.utils.book_new(); const statusLabel={rl:'Realizada',rp:'Reprogramada',pd:'Pendente',ca:'Cancelada'};
+    const summary=[['Teste previstos'],['Período',p.label],['Arquivo',automaticMeta.fileName],['Previstas',pv],['Realizadas',c.rl],['Reprogramadas',c.rp],['Pendentes',c.pd],['Canceladas',c.ca],['Execução %',pv?Calc.pct(c.rl,pv):'N/A']];
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(summary),'Resumo');
+    const data=[['Código','Superintendência','Prazo','Reprogramação','Data Real','Situação']]; detail.forEach(r=>data.push([r.codigo,r.supers.join(', '),brDate(r.prazo),brDate(r.reprog)||'—',brDate(r.real)||'—',statusLabel[r.classification]]));
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(data),'Acoes filtradas');
+    XLSX.writeFile(wb,`Teste_previstos_${isoDate(p.start)}_${isoDate(p.end)}.xlsx`);
+  }
+
   function zeroValues(){
     state.projectTotal=0; state.realizedUntilPeriod=0; state.costProjectTotal=0; state.costTotal=0; state.costCompleted=0;
     state.months.forEach(m=>{m.rl=m.rp=m.ca=m.pd=0});
@@ -166,11 +257,11 @@
   }
 
   function renderPresentationControls(){
-    const isP=view==='apresentacao';
+    const isP=view==='apresentacao'; const isA=view==='testePrevistos';
     const editorHeading=document.querySelector('.editor-topbar h1');
     const editorSub=document.querySelector('.editor-topbar .muted');
-    if(editorHeading) editorHeading.textContent=isP&&presentationEditing?'Editar Apresentação de Resultados':'Gerador de Relatório';
-    if(editorSub) editorSub.textContent=isP&&presentationEditing?'Altere grupos, dias, setores e horários. Salve para voltar à visualização.':'Edite textos e dados; o dashboard atualiza automaticamente.';
+    if(editorHeading) editorHeading.textContent=isP&&presentationEditing?'Editar Apresentação de Resultados':isA?'Teste previstos':'Gerador de Relatório';
+    if(editorSub) editorSub.textContent=isP&&presentationEditing?'Altere grupos, dias, setores e horários. Salve para voltar à visualização.':isA?'Importe a planilha e filtre o período para testar os cálculos automáticos.':'Edite textos e dados; o dashboard atualiza automaticamente.';
     monthlyEditor.hidden=!(!isP && view==='mensal');
     monthlyTextEditor.hidden=!(!isP && view==='mensal');
     monthlyTitleLabel.hidden=!(!isP && view==='mensal');
@@ -184,10 +275,13 @@
     const showPEdit=isP&&presentationEditing;
     presentationEditor.hidden=!showPEdit;
     presentationTextEditor.hidden=!showPEdit;
-    commonHeaderEditor.hidden=isP;
-    categoryEditorBlock.hidden=isP;
+    automaticEditor.hidden=!isA;
+    automaticTextEditor.hidden=!isA;
+    commonHeaderEditor.hidden=isP||isA;
+    categoryEditorBlock.hidden=isP||isA;
     if(isP&&!presentationEditing) document.body.classList.add('sidebar-collapsed');
     if(isP&&presentationEditing) document.body.classList.remove('sidebar-collapsed');
+    if(isA) document.body.classList.remove('sidebar-collapsed');
     if(isP&&!presentationEditing){
       presentationTitleInput.value=state.presentationTitle;
       presentationSubtitleInput.value=state.presentationSubtitle;
@@ -195,7 +289,7 @@
   }
 
   function bind(){
-    bindText('#monthlyTitleInput','monthlyTitle');bindText('#consolidatedTitleInput','consolidatedTitle');bindText('#costTitleInput','costTitle');bindText('#presentationTitleInput','presentationTitle');bindText('#presentationSubtitleInput','presentationSubtitle');bindText('#subtitleInput','subtitle');bindText('#periodInput','period');bindText('#dateInput','date');bindText('#monthlySectionTitleInput','monthlySectionTitle');bindText('#executionCardTitleInput','executionCardTitle');bindText('#plannedLabelInput','plannedLabel');bindText('#realizedLabelInput','realizedLabel');bindText('#consolidatedSectionTitleInput','consolidatedSectionTitle');bindText('#overviewLabelInput','overviewLabel');bindText('#consolidatedHeadingInput','consolidatedHeading');bindText('#costSectionTitleInput','costSectionTitle');
+    bindText('#monthlyTitleInput','monthlyTitle');bindText('#consolidatedTitleInput','consolidatedTitle');bindText('#automaticTitleInput','automaticTitle');bindText('#costTitleInput','costTitle');bindText('#presentationTitleInput','presentationTitle');bindText('#presentationSubtitleInput','presentationSubtitle');bindText('#subtitleInput','subtitle');bindText('#periodInput','period');bindText('#dateInput','date');bindText('#monthlySectionTitleInput','monthlySectionTitle');bindText('#executionCardTitleInput','executionCardTitle');bindText('#plannedLabelInput','plannedLabel');bindText('#realizedLabelInput','realizedLabel');bindText('#consolidatedSectionTitleInput','consolidatedSectionTitle');bindText('#overviewLabelInput','overviewLabel');bindText('#consolidatedHeadingInput','consolidatedHeading');bindText('#costSectionTitleInput','costSectionTitle');
     projectTotal.addEventListener('input',e=>{state.projectTotal=num(e.target.value);render()});realizedUntilPeriod.addEventListener('input',e=>{state.realizedUntilPeriod=num(e.target.value);render()});costProjectTotal.addEventListener('input',e=>{state.costProjectTotal=num(e.target.value);render()});costTotal.addEventListener('input',e=>{state.costTotal=num(e.target.value);render()});costCompleted.addEventListener('input',e=>{state.costCompleted=num(e.target.value);render()});
     categoryEditors.addEventListener('input',e=>{const box=e.target.closest('[data-cat]');if(!box)return;const k=box.dataset.cat,field=e.target.dataset.k;if(!field)return;state.categories[k][field]=e.target.value;renderEditors();render()});
     monthEditors.addEventListener('input',e=>{const box=e.target.closest('[data-mi]');if(!box)return;const k=e.target.dataset.k,i=+box.dataset.mi;state.months[i][k]=k==='name'?e.target.value:num(e.target.value);if(k==='name')syncDirectorMonths();render()});
@@ -204,6 +298,11 @@
     costUnitEditors.addEventListener('input',e=>{const box=e.target.closest('[data-cui]');if(!box)return;const i=+box.dataset.cui,k=e.target.dataset.k;if(!k)return;state.costUnits[i][k]=k==='name'?e.target.value:num(e.target.value);render()});
     presentationGroupEditors.addEventListener('input',e=>{const group=e.target.closest('[data-pgi]');if(!group)return;const gi=+group.dataset.pgi;if(e.target.dataset.pk){state.presentationGroups[gi][e.target.dataset.pk]=e.target.value;save();return}const sector=e.target.closest('[data-si]');if(sector&&e.target.dataset.sk&&e.target.dataset.sk!=='move'){const si=+sector.dataset.si;state.presentationGroups[gi].sectors[si][e.target.dataset.sk]=e.target.value;save()}});
     presentationGroupEditors.addEventListener('change',e=>{const sector=e.target.closest('[data-si]');if(!sector||e.target.dataset.sk!=='move')return;const [gi,si]=[+sector.dataset.pgi,+sector.dataset.si];const target=+e.target.value;if(target===gi)return;const item=state.presentationGroups[gi].sectors.splice(si,1)[0];state.presentationGroups[target].sectors.push(item);save();renderEditors();render()});
+    $('#actionPlanFile').addEventListener('change',e=>importAutomaticFile(e.target.files[0]));
+    ['autoPeriodMode','autoMonth','autoYear','autoStart','autoEnd','autoSuper','autoStatus'].forEach(id=>{const el=$('#'+id);if(el)el.addEventListener('change',()=>{if(id==='autoPeriodMode')syncAutomaticModeControls();render()})});
+    $('#autoExportExcel').onclick=()=>exportAutomaticExcel();
+    $('#autoPrint').onclick=()=>window.print();
+    syncAutomaticModeControls();
     savePresentation.onclick=()=>{save();presentationEditing=false;renderPresentationControls();document.body.classList.add('sidebar-collapsed');render()};
     document.addEventListener('click',e=>{
       if(e.target.dataset.exportPng!==undefined){exportPresentationPNG();return}
@@ -256,5 +355,5 @@
     const setSidebar=collapsed=>document.body.classList.toggle('sidebar-collapsed',collapsed);
     collapseSidebar.onclick=()=>setSidebar(true); openSidebar.onclick=()=>setSidebar(false);
   }
-  renderEditors();bind();renderPresentationControls();render();
+  renderEditors();bind();renderPresentationControls();refreshAutomaticControls();render();
 })();

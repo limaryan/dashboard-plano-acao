@@ -141,81 +141,38 @@ body.printing #editor,body.printing .sidebar-open,body.printing .presentation-ex
 .add-sector-box small{grid-column:1/-1;color:var(--muted);font-size:10px}
 @media(max-width:700px){.add-sector-box{grid-template-columns:1fr}.add-sector-box .add-inline{width:100%}}
 
-
-/* V6.7.1 — ajuste visual da Apresentação de Resultados.
-   Somente CSS: preserva integralmente a lógica e a edição da V6.6.
-   As tabelas usam 10 linhas de referência para manter os 8 cartões uniformes no 2 x 4.
-*/
-.presentation-grid .presentation-group-card{
-  display:flex;
-  flex-direction:column;
-  min-height:0;
-}
-.presentation-grid .presentation-rows{
-  flex:1 1 auto;
-  min-height:0;
-  display:grid;
-  grid-template-rows:repeat(10,minmax(0,1fr));
-  align-content:stretch;
-}
-.presentation-grid .presentation-row{
-  min-height:0;
-  display:grid;
-  align-items:center;
-  border-bottom:1px solid #e7edf4;
-  font-size:8.2px;
-  line-height:1.1;
-  padding:0;
-}
-.presentation-grid .presentation-row:last-child{border-bottom:0}
-.presentation-grid .presentation-row b{font-size:7.8px;white-space:nowrap}
-.presentation-grid .presentation-table-head{font-size:8px}
-
-/* PNG A4: 2 x 4 com linhas visualmente iguais e tipografia maior. */
-.png-export-sheet .presentation-group-card{
-  display:flex;
-  flex-direction:column;
-  min-height:0;
-}
-.png-export-sheet .presentation-rows{
-  flex:1 1 auto;
-  min-height:0;
-  display:grid;
-  grid-template-rows:repeat(10,minmax(0,1fr));
-}
-.png-export-sheet .presentation-row{
-  min-height:0;
-  display:grid;
-  align-items:center;
-  border-bottom:1px solid #e3e9f0;
-  padding:0;
-  font-size:7.8px;
-  line-height:1.08;
-}
-.png-export-sheet .presentation-row b{font-size:7.4px;white-space:nowrap}
-.png-export-sheet .presentation-table-head{font-size:7.2px}
-
+/* V6.8 — Teste previstos / leitura automática do Plano de Ação */
+.automatic-filebtn{display:inline-flex!important;align-items:center;justify-content:center;background:var(--navy)!important;color:#fff!important;padding:11px 13px!important;margin:8px 0!important}
+.automatic-file-status{margin:8px 0 14px;padding:10px 11px;border-radius:8px;background:#f3f6fa;border:1px solid var(--border);font-size:12px;font-weight:700;color:var(--muted)}
+.automatic-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.automatic-filters label{margin:4px 0!important}
+.automatic-filters select,.automatic-filters input{width:100%;padding:9px;border:1px solid #ccd5e1;border-radius:8px;background:#fff;color:var(--text);font:inherit}
+.automatic-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.automatic-actions button{border:0;border-radius:8px;padding:9px 11px;background:#eaf0f8;color:var(--navy);font-weight:700;cursor:pointer}
+.automatic-report{background:var(--bg);min-height:100%;padding-bottom:28px}
+.automatic-report .hero{background:var(--imip-green)}
+.automatic-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) 1.25fr;gap:12px}
+.auto-kpi{min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.auto-kpi span,.auto-execution>span{font-size:11px;font-weight:900;color:var(--muted);margin-bottom:8px}
+.auto-kpi b{font-size:40px;line-height:1}
+.auto-kpi.green b,.green-text{color:var(--green)!important}.auto-kpi.blue b,.blue-text{color:var(--blue)!important}.auto-kpi.red b,.red-text{color:var(--red)!important}.auto-kpi.yellow b,.yellow-text{color:var(--yellow)!important}
+.auto-execution{min-height:150px;display:flex;align-items:center;justify-content:center;gap:10px;flex-direction:column;text-align:center}
+.auto-execution .donut{width:115px;height:115px}.auto-execution .donut:after{inset:18px}.auto-execution .donut-center b{font-size:25px}
+.automatic-super-table,.automatic-detail{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.auto-table-row{display:grid;grid-template-columns:1.8fr repeat(6,minmax(70px,.75fr));gap:6px;align-items:center;padding:9px 10px;border-top:1px solid #e8edf3;font-size:11px}
+.auto-table-row:first-child{border-top:0}.auto-table-head{background:#eef3f8;color:var(--navy);font-size:9px;font-weight:900;border-top:0}.auto-detail .auto-table-row{grid-template-columns:80px 1.8fr 95px 110px 95px 120px}.auto-detail{max-height:430px;overflow:auto}.auto-detail .auto-table-row:not(.auto-table-head):hover{background:#f8fafc}.auto-detail-count{float:right;font-size:11px;color:var(--muted);font-weight:700}.auto-note{margin-top:10px;line-height:1.5}
+@media(max-width:1250px){.automatic-summary{grid-template-columns:repeat(3,1fr)}.auto-table-row{grid-template-columns:1.6fr repeat(6,minmax(60px,.75fr))}}
+@media(max-width:800px){.automatic-filters{grid-template-columns:1fr}.automatic-summary{grid-template-columns:repeat(2,1fr)}.automatic-report .content{padding:14px}.automatic-super-table,.automatic-detail{min-width:760px}.automatic-detail{overflow-x:auto}.auto-table-row{grid-template-columns:150px repeat(6,85px)}.auto-detail .auto-table-row{grid-template-columns:80px 180px 95px 110px 95px 120px}}
 @media print{
-  .presentation-report .presentation-group-card{
-    display:flex;
-    flex-direction:column;
-    min-height:0;
-  }
-  .presentation-report .presentation-rows{
-    flex:1 1 auto;
-    min-height:0;
-    display:grid;
-    grid-template-rows:repeat(10,minmax(0,1fr));
-  }
-  .presentation-report .presentation-row{
-    min-height:0;
-    display:grid;
-    align-items:center;
-    border-bottom:.25mm solid #e3e9f0;
-    padding:0;
-    font-size:7.2px;
-    line-height:1.05;
-  }
-  .presentation-report .presentation-row b{font-size:6.9px;white-space:nowrap}
-  .presentation-report .presentation-table-head{font-size:6.8px}
+  body:has(.automatic-report){overflow:visible;background:#fff}
+  body:has(.automatic-report) #app{display:block;height:auto;overflow:visible}
+  body:has(.automatic-report) #editor,body:has(.automatic-report) .sidebar-open{display:none!important}
+  body:has(.automatic-report) .stage{height:auto;padding:0;overflow:visible}
+  body:has(.automatic-report) .dashboard{min-width:0;box-shadow:none;border-radius:0;overflow:visible}
+  .automatic-report{background:#fff;min-height:auto;padding:0}
+  .automatic-report .hero{height:24mm;padding:5mm 6mm}
+  .automatic-summary{grid-template-columns:repeat(3,1fr);gap:2mm}
+  .auto-kpi,.auto-execution{min-height:30mm;padding:3mm}
+  .auto-kpi b{font-size:24px}.auto-execution .donut{width:65px;height:65px}.auto-execution .donut:after{inset:10px}.auto-execution .donut-center b{font-size:16px}
+  .auto-table-row{font-size:8px;padding:2mm 1.5mm}.auto-table-head{font-size:7px}.automatic-detail{max-height:none;overflow:visible}
 }
