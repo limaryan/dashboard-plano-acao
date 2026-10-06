@@ -77,10 +77,26 @@
   function parseBRDate(v){
     if(v===null||v===undefined||v==='')return null;
     if(v instanceof Date&&!isNaN(v))return new Date(v.getFullYear(),v.getMonth(),v.getDate(),12);
+    if(typeof v==='number'&&isFinite(v)){
+      // Excel serial date (1900 date system). The subtraction also accounts for Excel's fake 29/02/1900.
+      const d=new Date(Math.round((v-25569)*86400000));
+      if(!isNaN(d))return new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate(),12);
+    }
     const s=String(v).trim(); if(!s||s==='-')return null;
-    const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/); if(!m)return null;
-    let y=Number(m[3]); if(y<100)y+=2000; const d=new Date(y,Number(m[2])-1,Number(m[1]),12);
-    return d.getFullYear()===y&&d.getMonth()===Number(m[2])-1&&d.getDate()===Number(m[1])?d:null;
+    const clean=s.split(/[T ]/)[0].trim();
+    let m=clean.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{1,4})$/);
+    if(!m){
+      // Also accept ISO dates coming from some XLSX readers.
+      m=clean.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+      if(m){const y=Number(m[1]),mo=Number(m[2]),day=Number(m[3]);const d=new Date(y,mo-1,day,12);return d.getFullYear()===y&&d.getMonth()===mo-1&&d.getDate()===day?d:null;}
+      return null;
+    }
+    let day=Number(m[1]),mo=Number(m[2]),y=Number(m[3]);
+    // A few exported rows contain years such as 0026. Treat 2/3 digit years as 2000-based
+    // so the row remains auditable instead of disappearing from the period calculation.
+    if(y<100)y+=2000; else if(y<1900)y+=2000;
+    const d=new Date(y,mo-1,day,12);
+    return d.getFullYear()===y&&d.getMonth()===mo-1&&d.getDate()===day?d:null;
   }
   function isoDate(d){return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:''}
   function brDate(d){return d?`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`:''}
@@ -88,22 +104,23 @@
   function getAutomaticPeriod(){
     const mode=$('#autoPeriodMode')?.value||'month';
     if(mode==='year'){const y=Number($('#autoYear')?.value)||2026;return {start:new Date(y,0,1,12),end:new Date(y,11,31,12),label:String(y)}}
-    if(mode==='custom'){const a=parseBRDate($('#autoStart')?.value?.split('-').reverse().join('/'));const b=parseBRDate($('#autoEnd')?.value?.split('-').reverse().join('/'));return {start:a||new Date(2026,2,1,12),end:b||new Date(2026,2,31,12),label:`${brDate(a||new Date(2026,2,1,12))} a ${brDate(b||new Date(2026,2,31,12))}`}}
+    if(mode==='custom'){const a=parseBRDate($('#autoStart')?.value);const b=parseBRDate($('#autoEnd')?.value);return {start:a||new Date(2026,2,1,12),end:b||new Date(2026,2,31,12),label:`${brDate(a||new Date(2026,2,1,12))} a ${brDate(b||new Date(2026,2,31,12))}`}}
     const raw=$('#autoMonth')?.value||'2026-03';const [y,m]=raw.split('-').map(Number);const start=new Date(y,m-1,1,12);return {start,end:endOfMonth(y,m),label:start.toLocaleDateString('pt-BR',{month:'long',year:'numeric'})};
   }
   function classifyAutomatic(row,start,end){
     const prazo=row.prazo; if(!prazo||prazo<start||prazo>end)return null;
-    const status=String(row.status||'').toUpperCase();
-    if(status.includes('CANCELADA'))return 'ca';
-    // A ação é considerada realizada no mês do prazo original quando sua Data Real
-    // ocorreu até o fim do período, inclusive antes do prazo original.
-    if(row.real&&row.real<=end)return 'rl';
+    const status=normalizeHeader(row.status);
+    if(status.includes('cancelada'))return 'ca';
+    // Realizada only when the source marks the action as concluded and the real date
+    // confirms completion by the end of the selected period. Early completion counts.
+    const concluded=status.includes('acao concluida')||status.includes('concluido apos reprogramacao');
+    if(concluded&&row.real&&row.real<=end)return 'rl';
     if(row.reprog)return 'rp';
     return 'pd';
   }
   function automaticFilteredRows(){
     const p=getAutomaticPeriod(); const sup=$('#autoSuper')?.value||'__ALL__';
-    return automaticRows.map(r=>({...r,classification:classifyAutomatic(r,p.start,p.end)})).filter(r=>r.classification&&(sup==='__ALL__'||r.supers.includes(sup)));
+    return automaticRows.filter(r=>r.prazo&&r.prazo>=p.start&&r.prazo<=p.end).map(r=>({...r,classification:classifyAutomatic(r,p.start,p.end)})).filter(r=>sup==='__ALL__'||r.supers.includes(sup));
   }
   function automaticCounts(rows){return rows.reduce((a,r)=>(a[r.classification]++,a),{rl:0,rp:0,ca:0,pd:0})}
   function automaticSuperNames(){const set=new Set();automaticRows.forEach(r=>r.supers.forEach(x=>set.add(x)));return [...set].sort((a,b)=>a.localeCompare(b,'pt-BR'))}
@@ -114,38 +131,69 @@
     const years=new Set(); automaticRows.forEach(r=>{if(r.prazo)years.add(r.prazo.getFullYear())}); const ys=[...years].sort((a,b)=>a-b); year.innerHTML=ys.map(y=>`<option value="${y}">${y}</option>`).join(''); if(ys.includes(Number(currentYear)))year.value=currentYear; else if(ys.length)year.value=ys[0];
     const min=automaticRows.reduce((v,r)=>r.prazo&&(!v||r.prazo<v)?r.prazo:v,null), max=automaticRows.reduce((v,r)=>r.prazo&&(!v||r.prazo>v)?r.prazo:v,null); automaticMeta.minDate=min;automaticMeta.maxDate=max;
     if(min&&max){$('#autoMonth').min=`${min.getFullYear()}-${String(min.getMonth()+1).padStart(2,'0')}`;$('#autoMonth').max=`${max.getFullYear()}-${String(max.getMonth()+1).padStart(2,'0')}`;$('#autoStart').min=isoDate(min);$('#autoStart').max=isoDate(max);$('#autoEnd').min=isoDate(min);$('#autoEnd').max=isoDate(max)}
-    $('#automaticFileStatus').textContent=automaticRows.length?`✓ ${automaticRows.length.toLocaleString('pt-BR')} ações carregadas • ${automaticMeta.fileName}`:'Nenhuma planilha carregada.';
+    const invalid=automaticMeta.invalidPrazo||0;
+    $('#automaticFileStatus').textContent=automaticRows.length?`✓ ${automaticRows.length.toLocaleString('pt-BR')} ações carregadas • ${automaticMeta.fileName}${invalid?` • ${invalid} sem Prazo válido`:''}`:'Nenhuma planilha carregada.';
   }
   function syncAutomaticModeControls(){
     const mode=$('#autoPeriodMode')?.value||'month';$('#autoMonthWrap').hidden=mode!=='month';$('#autoYearWrap').hidden=mode!=='year';$('#autoStartWrap').hidden=mode!=='custom';$('#autoEndWrap').hidden=mode!=='custom';
   }
   function automaticDashboard(){
-    const p=getAutomaticPeriod(); const rows=automaticFilteredRows(); const c=automaticCounts(rows); const pv=c.rl+c.rp+c.ca+c.pd; const pct=pv?Calc.pct(c.rl,pv):null;
+    const p=getAutomaticPeriod(); const rows=automaticFilteredRows(); const c=automaticCounts(rows); const pv=rows.length; const pct=pv?Calc.pct(c.rl,pv):null;
     const selectedStatus=$('#autoStatus')?.value||'__ALL__'; const detailRows=selectedStatus==='__ALL__'?rows:rows.filter(r=>r.classification===selectedStatus);
     const supNames=automaticSuperNames();
-    const bySup=supNames.map(sup=>{const sr=rows.filter(r=>r.supers.includes(sup));const sc=automaticCounts(sr);const sp=sc.rl+sc.rp+sc.ca+sc.pd;return {sup,...sc,pv:sp,pct:sp?Calc.pct(sc.rl,sp):null}});
+    const bySup=supNames.map(sup=>{const sr=rows.filter(r=>r.supers.includes(sup));const sc=automaticCounts(sr);const sp=sr.length;return {sup,...sc,pv:sp,pct:sp?Calc.pct(sc.rl,sp):null}}).filter(x=>x.pv);
     const statusLabel={rl:'Realizadas',rp:'Reprogramadas',pd:'Pendentes',ca:'Canceladas'};
-    return `<div class="automatic-report"><header class="hero"><div><h1>${esc(state.automaticTitle||'Teste previstos')}</h1><p>Leitura automática do Plano de Ação</p></div><div class="hero-right"><b>${esc(p.label)}</b><p>${automaticRows.length?esc(automaticMeta.fileName):'Importe a planilha para iniciar'}</p></div></header><div class="content"><div class="automatic-summary"><div class="card auto-kpi"><span>PREVISTAS</span><b>${pv.toLocaleString('pt-BR')}</b></div><div class="card auto-kpi green"><span>REALIZADAS</span><b>${c.rl.toLocaleString('pt-BR')}</b></div><div class="card auto-kpi blue"><span>REPROGRAMADAS</span><b>${c.rp.toLocaleString('pt-BR')}</b></div><div class="card auto-kpi red"><span>PENDENTES</span><b>${c.pd.toLocaleString('pt-BR')}</b></div><div class="card auto-kpi yellow"><span>CANCELADAS</span><b>${c.ca.toLocaleString('pt-BR')}</b></div><div class="card auto-execution"><span>EXECUÇÃO</span>${UI.donut(pct,'CONCLUSÃO')}</div></div><h2 class="section-title">POR SUPERINTENDÊNCIA</h2><div class="automatic-super-table"><div class="auto-table-row auto-table-head"><b>SUPERINTENDÊNCIA</b><b>PREVISTAS</b><b>REALIZADAS</b><b>REPROGRAM.</b><b>PENDENTES</b><b>CANCELADAS</b><b>EXECUÇÃO</b></div>${bySup.map(x=>`<div class="auto-table-row"><span>${esc(x.sup)}</span><b>${x.pv}</b><b class="green-text">${x.rl}</b><b class="blue-text">${x.rp}</b><b class="red-text">${x.pd}</b><b class="yellow-text">${x.ca}</b><b>${x.pct===null?'N/A':x.pct+'%'}</b></div>`).join('')}</div><p class="muted auto-note">A ação é vinculada ao mês pelo <b>Prazo (coluna K)</b>. Se houver Data Real (M) até o fim do período, ela conta como realizada — inclusive quando concluída antes do prazo ou alguns dias depois. Sem Data Real, Reprogramação (L) classifica como reprogramada; cancelamentos seguem o Status (N). Ações compartilhadas entre superintendências aparecem em cada superintendência, mas no total geral são contadas uma única vez.</p><h2 class="section-title">AÇÕES DO PERÍODO <span class="auto-detail-count">${detailRows.length.toLocaleString('pt-BR')} registros</span></h2><div class="automatic-detail"><div class="auto-table-row auto-table-head"><b>CÓDIGO</b><b>SUPERINTENDÊNCIA</b><b>PRAZO</b><b>REPROGRAMAÇÃO</b><b>DATA REAL</b><b>SITUAÇÃO</b></div>${detailRows.map(r=>`<div class="auto-table-row"><span>${esc(r.codigo)}</span><span>${esc(r.supers.join(', '))}</span><span>${brDate(r.prazo)}</span><span>${brDate(r.reprog)||'—'}</span><span>${brDate(r.real)||'—'}</span><b class="${r.classification}-text">${statusLabel[r.classification]}</b></div>`).join('')}</div></div></div>`;
+    const reconciliation=c.rl+c.rp+c.ca+c.pd;
+    const audit=automaticMeta.invalidPrazo||0;
+    return `<div class="automatic-report"><header class="hero"><div><h1>${esc(state.automaticTitle||'Teste previstos')}</h1><p>Leitura automática do Plano de Ação</p></div><div class="hero-right"><b>${esc(p.label)}</b><p>${automaticRows.length?esc(automaticMeta.fileName):'Importe a planilha para iniciar'}</p></div></header><div class="content"><div class="automatic-summary"><div class="card auto-kpi"><span>PREVISTAS</span><b>${pv.toLocaleString('pt-BR')}</b></div><div class="card auto-kpi green"><span>REALIZADAS</span><b>${c.rl.toLocaleString('pt-BR')}</b></div><div class="card auto-kpi blue"><span>REPROGRAMADAS</span><b>${c.rp.toLocaleString('pt-BR')}</b></div><div class="card auto-kpi red"><span>PENDENTES</span><b>${c.pd.toLocaleString('pt-BR')}</b></div><div class="card auto-kpi yellow"><span>CANCELADAS</span><b>${c.ca.toLocaleString('pt-BR')}</b></div><div class="card auto-execution"><span>EXECUÇÃO</span>${UI.donut(pct,'CONCLUSÃO')}</div></div><div class="automatic-audit"><b>CONFERÊNCIA DO PERÍODO</b><span>${pv.toLocaleString('pt-BR')} ações selecionadas pelo <strong>Prazo original</strong></span><span>${reconciliation.toLocaleString('pt-BR')} ações classificadas</span><span class="${reconciliation===pv?'audit-ok':'audit-warn'}">${reconciliation===pv?'✓ Fechamento: OK':'⚠ Verificar classificação'}</span>${audit?`<span class="audit-warn">${audit} linha(s) sem Prazo válido foram mantidas fora dos períodos.</span>`:''}</div><h2 class="section-title">POR SUPERINTENDÊNCIA</h2><div class="automatic-super-table"><div class="auto-table-row auto-table-head"><b>SUPERINTENDÊNCIA</b><b>PREVISTAS</b><b>REALIZADAS</b><b>REPROGRAM.</b><b>PENDENTES</b><b>CANCELADAS</b><b>EXECUÇÃO</b></div>${bySup.map(x=>`<div class="auto-table-row"><span>${esc(x.sup)}</span><b>${x.pv}</b><b class="green-text">${x.rl}</b><b class="blue-text">${x.rp}</b><b class="red-text">${x.pd}</b><b class="yellow-text">${x.ca}</b><b>${x.pct===null?'N/A':x.pct+'%'}</b></div>`).join('')}</div><p class="muted auto-note">O período é definido exclusivamente pelo <b>Prazo original</b> da ação. Reprogramação, Data Real e Status são usados somente para classificar as ações já selecionadas. Conclusões antecipadas continuam pertencendo ao mês do Prazo original. Ações compartilhadas entre superintendências aparecem em cada superintendência, mas no total geral são contadas uma única vez.</p><h2 class="section-title">AÇÕES DO PERÍODO <span class="auto-detail-count">${detailRows.length.toLocaleString('pt-BR')} registros</span></h2><div class="automatic-detail"><div class="auto-table-row auto-table-head"><b>CÓDIGO</b><b>SUPERINTENDÊNCIA</b><b>PRAZO</b><b>REPROGRAMAÇÃO</b><b>DATA REAL</b><b>SITUAÇÃO</b></div>${detailRows.map(r=>`<div class="auto-table-row"><span>${esc(r.codigo)}</span><span>${esc(r.supers.join(', '))}</span><span>${brDate(r.prazo)}</span><span>${brDate(r.reprog)||'—'}</span><span>${brDate(r.real)||'—'}</span><b class="${r.classification}-text">${statusLabel[r.classification]}</b></div>`).join('')}</div></div></div>`;
+  }
+  function findHeaderRow(table){
+    const rows=[...table.querySelectorAll('tr')];
+    const wanted=['codigo','superintendencia','superveniencia','prazo','reprogramacao','data real','status'];
+    for(let i=0;i<Math.min(rows.length,25);i++){
+      const cells=[...rows[i].querySelectorAll('th,td')].map(c=>normalizeHeader(c.textContent));
+      const hits=wanted.filter(w=>cells.includes(w)).length;
+      if(hits>=5)return {index:i,cells};
+    }
+    return null;
+  }
+  function htmlTableToObjects(text){
+    const doc=new DOMParser().parseFromString(text,'text/html');
+    const table=doc.querySelector('table'); if(!table)throw new Error('Arquivo HTML sem tabela.');
+    const info=findHeaderRow(table); if(!info)throw new Error('Não foi possível localizar o cabeçalho da planilha.');
+    const rows=[...table.querySelectorAll('tr')].slice(info.index+1);
+    const headers=info.cells;
+    return rows.map(tr=>{const cells=[...tr.querySelectorAll('th,td')].map(c=>c.textContent.trim());const obj={};headers.forEach((h,i)=>obj[h||`coluna_${i}`]=cells[i]??'');return obj;}).filter(r=>Object.values(r).some(v=>String(v).trim()!==''));
   }
   async function importAutomaticFile(file){
     if(!file)return;
     try{
       if(typeof XLSX==='undefined')throw new Error('Biblioteca Excel indisponível.');
-      const buf=await file.arrayBuffer(); let wb;
-      const probeUtf= new TextDecoder('utf-8').decode(buf.slice(0,2048));
-      const probe1252= new TextDecoder('windows-1252').decode(buf.slice(0,2048));
-      const htmlProbe=/<(?:html|table|!doctype)/i.test(probeUtf)||/<(?:html|table|!doctype)/i.test(probe1252);
+      const buf=await file.arrayBuffer(); let raw=[];
+      const probeUtf= new TextDecoder('utf-8').decode(buf.slice(0,4096));
+      const probe1252= new TextDecoder('windows-1252').decode(buf.slice(0,4096));
+      const htmlProbe=/<(?:html|table|!doctype)\b/i.test(probeUtf)||/<(?:html|table|!doctype)\b/i.test(probe1252);
       if(htmlProbe){
-        const text=probe1252+new TextDecoder('windows-1252').decode(buf.slice(2048)); const doc=new DOMParser().parseFromString(text,'text/html'); const table=doc.querySelector('table'); if(!table)throw new Error('Arquivo HTML sem tabela.'); wb=XLSX.utils.book_new();const ws=XLSX.utils.table_to_sheet(table);XLSX.utils.book_append_sheet(wb,ws,'Plano');
+        // The current .xls export is actually UTF-8 HTML. Parse the table directly so no
+        // SheetJS header/date coercion can silently drop rows.
+        const text=new TextDecoder('utf-8').decode(buf);
+        raw=htmlTableToObjects(text);
       }else{
-        wb=XLSX.read(buf,{type:'array',cellDates:true,raw:true});
+        const isCsv=/\.csv$/i.test(file.name)||/^text\/csv/i.test(file.type||'');
+        const wb=XLSX.read(buf,{type:'array',cellDates:true,raw:true,codepage:65001});
+        const ws=wb.Sheets[wb.SheetNames[0]]; raw=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true,blankrows:false});
+        if(!raw.length&&isCsv)throw new Error('O CSV não possui linhas de dados.');
       }
-      const ws=wb.Sheets[wb.SheetNames[0]]; const raw=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true}); if(!raw.length)throw new Error('A planilha não possui linhas de dados.');
-      const headers=Object.keys(raw[0]); const find=(names,fallback)=>{const wanted=names.map(normalizeHeader);const found=headers.find(h=>wanted.includes(normalizeHeader(h)));return found||headers[fallback]};
-      const cols={codigo:find(['Código','Codigo'],0),sup:find(['Superveniência','Superveniencia'],5),prazo:find(['Prazo'],10),reprog:find(['Reprogramação','Reprogramacao'],11),real:find(['Data Real'],12),status:find(['Status'],13)};
-      if(!cols.sup||!cols.prazo||!cols.reprog||!cols.real||!cols.status)throw new Error('Não foi possível localizar as colunas F e K:N da planilha.');
-      automaticRows=raw.map((r,i)=>{const supText=String(r[cols.sup]??'').trim();return {codigo:String(r[cols.codigo]??i+1),supers:supText.split(',').map(x=>x.trim().toUpperCase()).filter(Boolean),prazo:parseBRDate(r[cols.prazo]),reprog:parseBRDate(r[cols.reprog]),real:parseBRDate(r[cols.real]),status:String(r[cols.status]??'').trim()}}).filter(r=>r.prazo);
-      automaticMeta.fileName=file.name;automaticMeta.loadedAt=new Date().toISOString();refreshAutomaticControls();render();
+      if(!raw.length)throw new Error('A planilha não possui linhas de dados.');
+      const headers=Object.keys(raw[0]);
+      const find=(names,fallback)=>{const wanted=names.map(normalizeHeader);const found=headers.find(h=>wanted.includes(normalizeHeader(h)));return found??headers[fallback]};
+      const cols={codigo:find(['Código','Codigo'],0),sup:find(['Superintendência','Superintendencia','Superveniência','Superveniencia'],5),prazo:find(['Prazo','Prazo final original','Prazo final'],10),reprog:find(['Reprogramação','Reprogramacao'],11),real:find(['Data Real','Data de Realização','Data de Realizacao'],12),status:find(['Status','Situação','Situacao'],13)};
+      if(!cols.sup||!cols.prazo||!cols.reprog||!cols.real||!cols.status)throw new Error('Não foi possível localizar as colunas de Superintendência e K:N da planilha.');
+      const mapped=raw.map((r,i)=>{const supText=String(r[cols.sup]??'').trim();return {codigo:String(r[cols.codigo]??i+1).trim(),supers:supText.split(/[,;]+/).map(x=>x.trim().toUpperCase()).filter(Boolean),prazo:parseBRDate(r[cols.prazo]),reprog:parseBRDate(r[cols.reprog]),real:parseBRDate(r[cols.real]),status:String(r[cols.status]??'').trim()}});
+      const invalidPrazo=mapped.filter(r=>!r.prazo).length;
+      automaticRows=mapped.filter(r=>r.prazo);
+      automaticMeta.fileName=file.name;automaticMeta.loadedAt=new Date().toISOString();automaticMeta.rawCount=mapped.length;automaticMeta.invalidPrazo=invalidPrazo;
+      refreshAutomaticControls();render();
     }catch(err){alert(`Não foi possível ler a planilha.\n\n${err.message||err}`)}
   }
   function renderEditors(){
