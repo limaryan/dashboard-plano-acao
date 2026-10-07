@@ -177,3 +177,40 @@ body.printing #editor,body.printing .sidebar-open,body.printing .presentation-ex
   .auto-kpi b{font-size:24px}.auto-execution .donut{width:65px;height:65px}.auto-execution .donut:after{inset:10px}.auto-execution .donut-center b{font-size:16px}
   .auto-table-row{font-size:8px;padding:2mm 1.5mm}.auto-table-head{font-size:7px}.automatic-detail{max-height:none;overflow:visible}
 }
+
+/* V6.8.2 — apresentação: maior legibilidade dos setores e horários */
+.presentation-group-head{padding:7px 9px 6px}
+.presentation-group-head h2{font-size:12px}
+.presentation-group-head strong{font-size:9px;margin-top:2px}
+.presentation-group-head>span{font-size:7px;padding:3px 5px}
+.presentation-table-head{padding:5px 8px;font-size:9px;grid-template-columns:minmax(0,1fr) 76px}
+.presentation-rows{padding:0 8px 4px}
+.presentation-row{grid-template-columns:minmax(0,1fr) 76px;gap:6px;padding:3px 0;font-size:11px;line-height:1.15}
+.presentation-row b{font-size:11px}
+.sector-name-field input,.add-sector-box input{text-transform:uppercase}
+
+/* PNG: preservar o layout 2x4, mas usar texto legível em 11px */
+.png-export-sheet .presentation-report-head{height:68px;padding:8px 12px}
+.png-export-sheet .presentation-report-head h1{font-size:17px}
+.png-export-sheet .presentation-report-head p{font-size:9px}
+.png-export-sheet .presentation-report-meta{font-size:8px;min-width:125px}
+.png-export-sheet .presentation-grid{height:1050px;padding:7px;gap:6px;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(4,1fr)}
+.png-export-sheet .presentation-group-head{padding:5px 7px 4px}
+.png-export-sheet .presentation-group-head h2{font-size:11px}
+.png-export-sheet .presentation-group-head strong{font-size:8px}
+.png-export-sheet .presentation-group-head>span{font-size:6px;padding:2px 4px}
+.png-export-sheet .presentation-table-head{padding:3px 6px;font-size:8px;grid-template-columns:minmax(0,1fr) 62px}
+.png-export-sheet .presentation-rows{padding:0 6px 2px}
+.png-export-sheet .presentation-row{grid-template-columns:minmax(0,1fr) 62px;gap:5px;padding:1.5px 0;font-size:11px;line-height:1.08}
+.png-export-sheet .presentation-row b{font-size:11px}
+
+/* Impressão/PDF: mesma prioridade de leitura da imagem */
+@media print{
+  .presentation-group-head{padding:1.8mm 2.2mm 1.4mm}
+  .presentation-group-head h2{font-size:10px}
+  .presentation-group-head strong{font-size:7px}
+  .presentation-table-head{padding:1mm 1.8mm;font-size:8px;grid-template-columns:minmax(0,1fr) 15mm}
+  .presentation-rows{padding:0 1.8mm .8mm}
+  .presentation-row{grid-template-columns:minmax(0,1fr) 15mm;gap:1mm;padding:.45mm 0;font-size:11px;line-height:1.05}
+  .presentation-row b{font-size:11px}
+}
