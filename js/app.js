@@ -336,6 +336,23 @@
     }
   }
 
+  function initPageDarkMode(){
+    const saved=localStorage.getItem('dashboardPageDark')==='1';
+    document.body.classList.toggle('page-dark',saved);
+    const b=document.getElementById('darkModePages');
+    if(b){b.textContent=saved?'☀':'☾';b.title=saved?'Desativar modo noturno das páginas':'Ativar modo noturno das páginas';}
+    if(b)b.onclick=()=>{const on=!document.body.classList.contains('page-dark');document.body.classList.toggle('page-dark',on);localStorage.setItem('dashboardPageDark',on?'1':'0');b.textContent=on?'☀':'☾';b.title=on?'Desativar modo noturno das páginas':'Ativar modo noturno das páginas';};
+  }
+  function initEditorResize(){
+    const editor=document.getElementById('editor'), handle=document.getElementById('editorResizeHandle');
+    if(!editor||!handle)return;
+    let dragging=false;
+    const saved=parseInt(localStorage.getItem('dashboardEditorWidth')||'560',10);
+    if(saved>=420&&saved<=800)document.getElementById('app').style.gridTemplateColumns=`${saved}px minmax(0,1fr)`;
+    handle.addEventListener('pointerdown',e=>{dragging=true;handle.setPointerCapture(e.pointerId);document.body.style.userSelect='none';});
+    handle.addEventListener('pointermove',e=>{if(!dragging)return;const width=Math.max(420,Math.min(800,e.clientX));document.getElementById('app').style.gridTemplateColumns=`${width}px minmax(0,1fr)`;});
+    handle.addEventListener('pointerup',()=>{dragging=false;document.body.style.userSelect='';const width=parseInt(getComputedStyle(editor).width,10);if(width>=420&&width<=800)localStorage.setItem('dashboardEditorWidth',String(width));});
+  }
   function bind(){
     bindText('#monthlyTitleInput','monthlyTitle');bindText('#consolidatedTitleInput','consolidatedTitle');bindText('#automaticTitleInput','automaticTitle');bindText('#costTitleInput','costTitle');bindText('#presentationTitleInput','presentationTitle');bindText('#presentationSubtitleInput','presentationSubtitle');bindText('#subtitleInput','subtitle');bindText('#periodInput','period');bindText('#dateInput','date');bindText('#monthlySectionTitleInput','monthlySectionTitle');bindText('#executionCardTitleInput','executionCardTitle');bindText('#plannedLabelInput','plannedLabel');bindText('#realizedLabelInput','realizedLabel');bindText('#consolidatedSectionTitleInput','consolidatedSectionTitle');bindText('#overviewLabelInput','overviewLabel');bindText('#consolidatedHeadingInput','consolidatedHeading');bindText('#costSectionTitleInput','costSectionTitle');
     projectTotal.addEventListener('input',e=>{state.projectTotal=num(e.target.value);render()});realizedUntilPeriod.addEventListener('input',e=>{state.realizedUntilPeriod=num(e.target.value);render()});costProjectTotal.addEventListener('input',e=>{state.costProjectTotal=num(e.target.value);render()});costTotal.addEventListener('input',e=>{state.costTotal=num(e.target.value);render()});costCompleted.addEventListener('input',e=>{state.costCompleted=num(e.target.value);render()});
@@ -403,5 +420,5 @@
     const setSidebar=collapsed=>document.body.classList.toggle('sidebar-collapsed',collapsed);
     collapseSidebar.onclick=()=>setSidebar(true); openSidebar.onclick=()=>setSidebar(false);
   }
-  renderEditors();bind();renderPresentationControls();refreshAutomaticControls();render();
+  renderEditors();bind();initPageDarkMode();initEditorResize();renderPresentationControls();refreshAutomaticControls();render();
 })();

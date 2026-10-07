@@ -276,3 +276,28 @@ body.printing #editor,body.printing .sidebar-open,body.printing .presentation-ex
   }
   .presentation-row b{font-size:11px}
 }
+
+/* V6.8.4 — editor 2x2, tema escuro das páginas e largura ajustável */
+.sector-edit{display:grid!important;grid-template-columns:minmax(0,1.7fr) minmax(170px,1fr)!important;grid-template-rows:auto auto;gap:10px 12px!important;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--card);margin:8px 0}
+.sector-edit .sector-name-field{grid-column:1;grid-row:1}
+.sector-edit .sector-time-field{grid-column:2;grid-row:1}
+.sector-edit .sector-move-field{grid-column:1;grid-row:2}
+.sector-edit .sector-actions{grid-column:2;grid-row:2;display:flex;align-items:end;justify-content:flex-end;gap:8px}
+.sector-edit .sector-actions .reorder{display:flex;gap:5px}
+.sector-edit .sector-actions button{min-width:34px;height:32px}
+.editor-resize-handle{position:absolute;right:-4px;top:0;width:8px;height:100%;cursor:col-resize;z-index:20}
+.editor{position:relative}
+body.page-dark .stage{background:#111827}
+body.page-dark .dashboard,.page-dark .presentation-report{background:#18212f;color:#edf2f7}
+body.page-dark .card,.page-dark .cost-kpi,.page-dark .cost-donut-card,.page-dark .unit-card,.page-dark .month-card,.page-dark .director-card,.page-dark .presentation-group-card{background:#202b3b;color:#edf2f7}
+body.page-dark .donut:after,.page-dark .status-donut:after{background:#202b3b}
+body.page-dark .total,.page-dark .cost-pair>div{background:#263447}
+body.page-dark .section-title{border-color:#415064}
+body.page-dark .presentation-report-head{background:#006f35}
+body.page-dark .presentation-group-head{background:#263447}
+body.page-dark .presentation-table-head{background:#334155;color:#fff}
+body.page-dark .presentation-row{border-color:#435268}
+body.page-dark .muted,.page-dark .donut-center span,.page-dark .metric small{color:#b6c1cf}
+body.page-dark .presentation-report-head p{color:#d9e3ee}
+.page-dark-toggle{margin-left:auto}
+@media(max-width:800px){.sector-edit{grid-template-columns:1fr!important}.sector-edit .sector-name-field,.sector-edit .sector-time-field,.sector-edit .sector-move-field,.sector-edit .sector-actions{grid-column:1;grid-row:auto}.sector-edit .sector-actions{justify-content:flex-start}}
