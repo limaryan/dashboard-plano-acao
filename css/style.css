@@ -214,3 +214,65 @@ body.printing #editor,body.printing .sidebar-open,body.printing .presentation-ex
   .presentation-row{grid-template-columns:minmax(0,1fr) 15mm;gap:1mm;padding:.45mm 0;font-size:11px;line-height:1.05}
   .presentation-row b{font-size:11px}
 }
+
+
+/* V6.8.3 — reforço de legibilidade da Apresentação de Resultados */
+.presentation-row{
+  font-size:11px;
+  line-height:1.18;
+  padding:4px 0;
+  align-items:center;
+}
+.presentation-row span,
+.presentation-row b{
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+.presentation-row b{font-size:11px}
+.presentation-table-head{
+  font-size:9px;
+  padding:5px 9px;
+}
+.presentation-group-head{
+  padding:7px 9px 5px;
+}
+.presentation-group-head h2{font-size:13px}
+.presentation-group-head strong{font-size:9px}
+.presentation-group-head>span{font-size:7px}
+
+/* No editor, mantém os nomes dos setores visualmente padronizados em caixa alta. */
+.sector-name-field input,
+.add-sector-box input[data-new-sector-name]{text-transform:uppercase}
+
+/* Exportação PNG: a área disponível é usada para privilegiar a leitura dos setores. */
+.png-export-sheet .presentation-group-head{padding:6px 8px 4px}
+.png-export-sheet .presentation-group-head h2{font-size:11px}
+.png-export-sheet .presentation-group-head strong{font-size:8px}
+.png-export-sheet .presentation-table-head{
+  font-size:8px;
+  padding:4px 7px;
+}
+.png-export-sheet .presentation-row{
+  font-size:11px;
+  line-height:1.12;
+  padding:3px 0;
+  align-items:center;
+}
+.png-export-sheet .presentation-row b{font-size:11px}
+.png-export-sheet .presentation-row span,
+.png-export-sheet .presentation-row b{
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+
+@media print{
+  .presentation-group-head h2{font-size:11px}
+  .presentation-group-head strong{font-size:8px}
+  .presentation-table-head{font-size:8px}
+  .presentation-row{
+    font-size:11px;
+    line-height:1.12;
+    padding:1.5mm 0;
+  }
+  .presentation-row b{font-size:11px}
+}
