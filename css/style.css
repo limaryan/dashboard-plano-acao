@@ -24,16 +24,16 @@ body.printing #editor,body.printing .sidebar-open,body.printing .presentation-ex
 @media(max-width:900px){.presentation-sector-table-head{display:none}.sector-edit{grid-template-columns:1fr 1fr!important}.sector-actions{grid-column:1/-1}.sector-name-field{grid-column:1/-1}.sector-move-field{grid-column:1/-1}}
 
 /* Apresentação de resultados — edição por arraste e folha 2 x 4 */
-.presentation-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:10px;padding:14px;align-items:stretch}
+.presentation-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,max-content);gap:10px;padding:14px;align-items:start}
 .presentation-group-card{min-width:0;box-shadow:0 3px 10px #17345c0d;border-radius:9px}
 .presentation-group-head{padding:9px 10px 7px}
-.presentation-group-head h2{font-size:13px}
-.presentation-group-head strong{font-size:10px;margin-top:3px}
+.presentation-group-head h2{font-size:16px}
+.presentation-group-head strong{font-size:11px;margin-top:3px}
 .presentation-group-head>span{font-size:8px;padding:4px 6px}
-.presentation-table-head{padding:5px 9px;font-size:8px;grid-template-columns:minmax(0,1fr) 70px}
+.presentation-table-head{padding:7px 9px;font-size:10px;grid-template-columns:minmax(0,1fr) 86px}
 .presentation-rows{padding:0 9px 5px}
-.presentation-row{grid-template-columns:minmax(0,1fr) 70px;gap:5px;padding:3px 0;font-size:8px;line-height:1.15}
-.presentation-row b{font-size:7.5px}
+.presentation-row{grid-template-columns:minmax(0,1fr) 86px;gap:8px;padding:7px 0;font-size:13px;line-height:1.3;align-items:start}
+.presentation-row b{font-size:12px;white-space:nowrap}
 .presentation-report-head{padding:12px 16px}
 .presentation-report-head h1{font-size:20px}
 .presentation-report-head p{font-size:10px;margin-top:3px}
@@ -56,23 +56,25 @@ body.printing #editor,body.printing .sidebar-open,body.printing .presentation-ex
 .sector-actions .delete{height:34px}
 .presentation-group-edit .presentation-sector-editors{margin-top:7px}
 
-/* Área fora da tela usada para gerar o PNG em A4 retrato, 2 colunas x 4 linhas. */
-.png-export-host{position:fixed;left:-100000px;top:0;width:794px;height:1123px;overflow:hidden;pointer-events:none;background:#fff}
-.png-export-sheet{width:794px;height:1123px!important;min-height:1123px;background:#fff!important;padding:0!important;overflow:hidden}
-.png-export-sheet .presentation-report-head{height:78px;padding:10px 14px}
+/* Exportação PNG: mantém 2 colunas x 4 linhas, mas a altura se adapta ao conteúdo.
+   Nunca comprime nem corta setores para caber em uma folha fixa. */
+.png-export-host{position:fixed;left:-100000px;top:0;width:794px;height:auto;overflow:visible;pointer-events:none;background:#fff}
+.png-export-sheet{width:794px;height:auto!important;min-height:0!important;background:#fff!important;padding:0!important;overflow:visible!important}
+.png-export-sheet .presentation-report-head{height:auto;min-height:78px;padding:12px 14px}
 .png-export-sheet .presentation-report-head h1{font-size:18px}
 .png-export-sheet .presentation-report-head p{font-size:9px}
 .png-export-sheet .presentation-report-meta{font-size:8px;min-width:130px}
-.png-export-sheet .presentation-grid{height:1045px;padding:8px;gap:7px;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(4,1fr)}
-.png-export-sheet .presentation-group-card{border-radius:6px;box-shadow:none}
-.png-export-sheet .presentation-group-head{padding:6px 8px 5px}
-.png-export-sheet .presentation-group-head h2{font-size:11px}
-.png-export-sheet .presentation-group-head strong{font-size:8px}
-.png-export-sheet .presentation-group-head>span{font-size:6.5px;padding:3px 4px}
-.png-export-sheet .presentation-table-head{padding:4px 7px;font-size:6.5px;grid-template-columns:minmax(0,1fr) 58px}
-.png-export-sheet .presentation-rows{padding:0 7px 3px}
-.png-export-sheet .presentation-row{grid-template-columns:minmax(0,1fr) 58px;padding:2px 0;font-size:6.8px;line-height:1.1}
-.png-export-sheet .presentation-row b{font-size:6.3px}
+.png-export-sheet .presentation-grid{height:auto!important;min-height:0!important;padding:8px;gap:9px;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,max-content);align-items:start;overflow:visible!important}
+.png-export-sheet .presentation-group-card{height:auto!important;min-height:0!important;border-radius:6px;box-shadow:none;overflow:visible!important}
+.png-export-sheet .presentation-group-head{padding:8px 9px 6px}
+.png-export-sheet .presentation-group-head h2{font-size:16px}
+.png-export-sheet .presentation-group-head strong{font-size:11px}
+.png-export-sheet .presentation-group-head>span{font-size:7px;padding:3px 5px}
+.png-export-sheet .presentation-table-head{padding:5px 8px;font-size:9px;grid-template-columns:minmax(0,1fr) 82px}
+.png-export-sheet .presentation-rows{padding:0 8px 5px;overflow:visible!important}
+.png-export-sheet .presentation-row{grid-template-columns:minmax(0,1fr) 82px;padding:6px 0;font-size:13px;line-height:1.3;align-items:start}
+.png-export-sheet .presentation-row span{overflow-wrap:anywhere;word-break:normal}
+.png-export-sheet .presentation-row b{font-size:12px;white-space:nowrap}
 
 @page{size:A4 portrait;margin:0}
 @media print{
@@ -236,7 +238,7 @@ body.printing #editor,body.printing .sidebar-open,body.printing .presentation-ex
 .presentation-group-head{
   padding:7px 9px 5px;
 }
-.presentation-group-head h2{font-size:13px}
+.presentation-group-head h2{font-size:16px}
 .presentation-group-head strong{font-size:9px}
 .presentation-group-head>span{font-size:7px}
 
@@ -303,96 +305,99 @@ body.page-dark .presentation-report-head p{color:#d9e3ee}
 @media(max-width:800px){.sector-edit{grid-template-columns:1fr!important}.sector-edit .sector-name-field,.sector-edit .sector-time-field,.sector-edit .sector-move-field,.sector-edit .sector-actions{grid-column:1;grid-row:auto}.sector-edit .sector-actions{justify-content:flex-start}}
 
 
-/* V6.8.5 — refinamento seguro da sidebar e da apresentação.
-   Mantém a estrutura/JS da V6.8.4; apenas ajusta o layout visual. */
-#app{grid-template-columns:360px minmax(0,1fr)}
-.editor{
-  height:100vh;
-  padding:0;
-  overflow-y:auto;
-  overflow-x:hidden;
-  scrollbar-width:thin;
-  scrollbar-color:#c4cfdd transparent;
-  position:relative;
+/* V6.8.5 — preserva o cronograma 2x4 sem comprimir ou cortar setores */
+.presentation-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-template-rows:repeat(4,auto)!important;
+  align-items:start!important;
+  align-content:start!important;
+  overflow:visible!important;
 }
-.editor::-webkit-scrollbar{width:8px}
-.editor::-webkit-scrollbar-track{background:transparent}
-.editor::-webkit-scrollbar-thumb{background:#c4cfdd;border-radius:999px}
-.editor-topbar{
-  position:sticky;
-  top:0;
-  z-index:10;
-  min-height:68px;
-  padding:14px 14px 12px 16px;
-  margin:0;
-  background:#fff;
-  border-bottom:1px solid #e3e8ef;
-  box-shadow:0 1px 4px rgba(16,47,99,.06);
+.presentation-group-card{
+  height:auto!important;
+  min-height:0!important;
+  overflow:hidden;
 }
-.editor-topbar h1{font-size:18px;line-height:1.2;margin:0 0 4px}
-.editor-topbar .muted{font-size:12px;line-height:1.35}
-.editor-top-actions{display:flex;align-items:center;gap:5px;flex:0 0 auto}
-.editor-top-actions .icon-btn{width:36px;height:36px;border-radius:8px;background:#f0f3f7;color:#0b2e68;font-size:17px}
-.editor-top-actions .icon-btn:hover{background:#e5eaf1}
-.editor>.tabs{margin:14px 16px}
-.editor>.editor-block{margin-left:16px;margin-right:16px}
-.editor>.actions{margin-left:16px;margin-right:16px}
-.sidebar-open{
-  position:fixed;
-  top:14px;
-  left:14px;
-  width:38px;
-  height:38px;
-  margin:0;
-  border:1px solid #d9dfe7;
-  background:#fff;
-  box-shadow:0 2px 8px rgba(16,47,99,.12);
-  z-index:30;
+.presentation-rows{height:auto!important;overflow:visible!important}
+.presentation-row{
+  min-height:24px;
+  height:auto!important;
+  align-items:center;
+  white-space:normal;
+}
+.presentation-row span{
+  min-width:0;
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+.presentation-row b{
+  min-width:70px;
+  white-space:nowrap;
+}
+
+/* Handle visível para deixar claro que a barra lateral pode ser redimensionada. */
+.editor-resize-handle{
+  position:absolute!important;
+  right:-6px!important;
+  top:0!important;
+  width:12px!important;
+  height:100%!important;
+  cursor:col-resize!important;
+  z-index:30!important;
+  display:flex;
   align-items:center;
   justify-content:center;
+  background:transparent;
 }
-body.sidebar-collapsed #app{grid-template-columns:0 minmax(0,1fr)!important}
-body.sidebar-collapsed .editor{visibility:hidden;padding-left:0;padding-right:0;border-right:0}
-body.sidebar-collapsed .sidebar-open{display:flex}
-
-/* Apresentação: mais leitura sem desmontar o 2x4. */
-.presentation-grid{padding:22px;gap:16px;align-items:start}
-.presentation-group-card{min-width:0}
-.presentation-group-head{padding:11px 12px 9px}
-.presentation-group-head h2{font-size:16px;line-height:1.2}
-.presentation-group-head strong{font-size:11px;line-height:1.2;margin-top:4px}
-.presentation-group-head>span{font-size:8px;padding:4px 6px}
-.presentation-table-head{grid-template-columns:minmax(0,1fr) 88px;padding:8px 11px;font-size:10px}
-.presentation-rows{padding:0 11px 8px}
-.presentation-row{
-  grid-template-columns:minmax(0,1fr) 88px;
-  gap:8px;
-  min-height:28px;
-  padding:6px 0;
-  align-items:start;
-  font-size:13px;
-  line-height:1.28;
+.resize-grip{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  width:8px;
+  min-height:34px;
+  padding:5px 2px;
+  border-radius:6px;
+  background:#eef2f7;
+  border:1px solid #d5dee9;
+  box-shadow:0 1px 3px rgba(11,46,104,.10);
+  transition:background .15s ease, border-color .15s ease, transform .15s ease;
 }
-.presentation-row span{overflow-wrap:anywhere;word-break:normal}
-.presentation-row b{font-size:12px;line-height:1.28;white-space:nowrap;padding-top:1px}
+.resize-grip i{
+  display:block;
+  width:3px;
+  height:3px;
+  border-radius:50%;
+  background:#718198;
+}
+.editor-resize-handle:hover .resize-grip,
+.editor-resize-handle:active .resize-grip{
+  background:#e1eaf5;
+  border-color:#aebfd3;
+  transform:scale(1.05);
+}
+.editor-resize-handle:active{cursor:grabbing!important}
 
-/* Exportações: aumenta a leitura, mas preserva a composição 2x4. */
-.png-export-sheet .presentation-group-head{padding:8px 9px 7px}
-.png-export-sheet .presentation-group-head h2{font-size:13px;line-height:1.2}
-.png-export-sheet .presentation-group-head strong{font-size:10px}
-.png-export-sheet .presentation-table-head{padding:6px 8px;font-size:9px;grid-template-columns:minmax(0,1fr) 70px}
-.png-export-sheet .presentation-rows{padding:0 8px 5px}
-.png-export-sheet .presentation-row{grid-template-columns:minmax(0,1fr) 70px;gap:6px;min-height:24px;padding:4px 0;font-size:11px;line-height:1.2}
-.png-export-sheet .presentation-row b{font-size:11px}
+/* Exportação PNG: mantém 2x4, mas deixa cada linha crescer conforme o conteúdo. */
+.png-export-sheet .presentation-grid{
+  height:1045px!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-template-rows:repeat(4,auto)!important;
+  align-items:start!important;
+  align-content:start!important;
+  overflow:visible!important;
+}
+.png-export-sheet .presentation-group-card{height:auto!important;min-height:0!important}
 
 @media print{
-  .presentation-row{font-size:11px;line-height:1.15;padding:1.2mm 0}
-  .presentation-row b{font-size:11px}
-}
-
-@media(max-width:1200px){#app{grid-template-columns:360px minmax(0,1fr)}}
-@media(max-width:800px){
-  #app{grid-template-columns:1fr}
-  .editor{height:auto;max-height:none;overflow:visible}
-  .editor-topbar{position:sticky;top:0}
+  .presentation-grid{
+    height:275mm!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-rows:repeat(4,auto)!important;
+    align-items:start!important;
+    align-content:start!important;
+    overflow:visible!important;
+  }
+  .presentation-group-card{height:auto!important;min-height:0!important}
 }

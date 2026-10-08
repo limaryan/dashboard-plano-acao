@@ -260,7 +260,8 @@
     host.appendChild(clone);
     document.body.appendChild(host);
     try{
-      const canvas=await html2canvas(clone,{backgroundColor:'#fff',scale:2,useCORS:true,logging:false,width:794,height:1123,windowWidth:794});
+      const exportHeight=Math.ceil(clone.scrollHeight);
+      const canvas=await html2canvas(clone,{backgroundColor:'#fff',scale:2,useCORS:true,logging:false,width:794,height:exportHeight,windowWidth:794,windowHeight:exportHeight});
       const a=document.createElement('a');
       a.download='apresentacao-de-resultados.png';
       a.href=canvas.toDataURL('image/png');
