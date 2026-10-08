@@ -347,11 +347,11 @@
     const editor=document.getElementById('editor'), handle=document.getElementById('editorResizeHandle');
     if(!editor||!handle)return;
     let dragging=false;
-    const saved=parseInt(localStorage.getItem('dashboardEditorWidth')||'560',10);
-    if(saved>=420&&saved<=800)document.getElementById('app').style.gridTemplateColumns=`${saved}px minmax(0,1fr)`;
+    const saved=parseInt(localStorage.getItem('dashboardEditorWidthV685')||'360',10);
+    if(saved>=320&&saved<=600)document.getElementById('app').style.gridTemplateColumns=`${saved}px minmax(0,1fr)`;
     handle.addEventListener('pointerdown',e=>{dragging=true;handle.setPointerCapture(e.pointerId);document.body.style.userSelect='none';});
-    handle.addEventListener('pointermove',e=>{if(!dragging)return;const width=Math.max(420,Math.min(800,e.clientX));document.getElementById('app').style.gridTemplateColumns=`${width}px minmax(0,1fr)`;});
-    handle.addEventListener('pointerup',()=>{dragging=false;document.body.style.userSelect='';const width=parseInt(getComputedStyle(editor).width,10);if(width>=420&&width<=800)localStorage.setItem('dashboardEditorWidth',String(width));});
+    handle.addEventListener('pointermove',e=>{if(!dragging)return;const width=Math.max(320,Math.min(600,e.clientX));document.getElementById('app').style.gridTemplateColumns=`${width}px minmax(0,1fr)`;});
+    handle.addEventListener('pointerup',()=>{dragging=false;document.body.style.userSelect='';const width=parseInt(getComputedStyle(editor).width,10);if(width>=320&&width<=600)localStorage.setItem('dashboardEditorWidth',String(width));});
   }
   function bind(){
     bindText('#monthlyTitleInput','monthlyTitle');bindText('#consolidatedTitleInput','consolidatedTitle');bindText('#automaticTitleInput','automaticTitle');bindText('#costTitleInput','costTitle');bindText('#presentationTitleInput','presentationTitle');bindText('#presentationSubtitleInput','presentationSubtitle');bindText('#subtitleInput','subtitle');bindText('#periodInput','period');bindText('#dateInput','date');bindText('#monthlySectionTitleInput','monthlySectionTitle');bindText('#executionCardTitleInput','executionCardTitle');bindText('#plannedLabelInput','plannedLabel');bindText('#realizedLabelInput','realizedLabel');bindText('#consolidatedSectionTitleInput','consolidatedSectionTitle');bindText('#overviewLabelInput','overviewLabel');bindText('#consolidatedHeadingInput','consolidatedHeading');bindText('#costSectionTitleInput','costSectionTitle');

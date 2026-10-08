@@ -49,14 +49,3 @@ A planilha atual contém **2.447 ações** e, considerando exclusivamente o Praz
 - Março/2026: **104 ações previstas**
 
 Esses números são usados como conferência da correção; não são valores fixados no código.
-
-
-## V6.8.5
-- Refinada a barra lateral de edição com estrutura de cabeçalho fixo e conteúdo rolável independente.
-- Ajustada a largura inicial da barra lateral para 420 px, mantendo redimensionamento manual entre 420 e 800 px.
-- O estado de largura usa uma chave de armazenamento própria da V6.8.5 para evitar herdar larguras antigas inadequadas.
-- Botões de recolher/abrir foram reposicionados para um comportamento mais consistente de painel lateral.
-- Melhorado o aproveitamento do espaço na Apresentação de Resultados.
-- Aumentada a legibilidade dos nomes dos setores e horários, com quebra de linha para nomes longos.
-- Ajustados PNG e impressão/PDF para preservar uma hierarquia tipográfica legível.
-- Mantidos os demais módulos e funcionalidades da V6.8.4.
