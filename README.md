@@ -49,3 +49,10 @@ A planilha atual contém **2.447 ações** e, considerando exclusivamente o Praz
 - Março/2026: **104 ações previstas**
 
 Esses números são usados como conferência da correção; não são valores fixados no código.
+
+
+## V6.8.8 — correções estruturais
+- Corrigida a sincronização entre recolhimento da sidebar e largura em estilo inline.
+- A Apresentação de Resultados passa a usar a largura disponível.
+- Grade 2x4 com alturas automáticas por conteúdo, sem ocultar setores.
+- Impressão/PDF sem altura A4 fixa com corte forçado.

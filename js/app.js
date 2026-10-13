@@ -232,7 +232,7 @@
   function presentationDashboard(){
     return `<div class="presentation-report" id="presentationReport"><div class="presentation-report-head"><div><h1>${esc(state.presentationTitle)}</h1><p>${esc(state.presentationSubtitle)}</p></div><div class="presentation-report-meta"><b>${state.presentationGroups.length} grupos</b><span>Atualizado em ${dateBR(state.date)}</span><div class="presentation-report-actions"><button class="presentation-edit-btn" type="button" data-presentation-edit="1">Editar</button><button class="presentation-png-btn" type="button" data-export-png="1">Baixar PNG</button></div></div></div><div class="presentation-grid">${state.presentationGroups.map((g,gi)=>`<section class="presentation-group-card"><div class="presentation-group-head"><div><h2>${esc(g.name).toUpperCase()}</h2><strong>${dateBR(g.date)}</strong></div><span>GRUPO ${gi+1}</span></div><div class="presentation-table-head"><span>SETORES</span><span>HORÁRIO</span></div><div class="presentation-rows">${g.sectors.map(x=>`<div class="presentation-row"><span>${esc(x.name)}</span><b>${esc(x.start)} - ${esc(x.end)}</b></div>`).join('')}</div></section>`).join('')}</div></div>`;
   }
-  function render(){dashboard.innerHTML=view==='mensal'?monthly():view==='consolidado'?consolidated():view==='sgdiretoria'?sgDiretoria():view==='custos'?costDashboard():view==='apresentacao'?presentationDashboard():automaticDashboard();save()}
+  function render(){document.body.classList.toggle('view-presentation-results',view==='apresentacao');dashboard.innerHTML=view==='mensal'?monthly():view==='consolidado'?consolidated():view==='sgdiretoria'?sgDiretoria():view==='custos'?costDashboard():view==='apresentacao'?presentationDashboard():automaticDashboard();save()}
   function bindText(id,key){$(id).addEventListener('input',e=>{state[key]=e.target.value;render()})}
 
   async function exportPresentationPNG(){
@@ -329,9 +329,12 @@
     automaticTextEditor.hidden=!isA;
     commonHeaderEditor.hidden=isP||isA;
     categoryEditorBlock.hidden=isP||isA;
-    if(isP&&!presentationEditing) document.body.classList.add('sidebar-collapsed');
-    if(isP&&presentationEditing) document.body.classList.remove('sidebar-collapsed');
-    if(isA) document.body.classList.remove('sidebar-collapsed');
+    const appLayout=document.getElementById('app');
+    const storedEditorWidth=parseInt(localStorage.getItem('dashboardEditorWidth')||'560',10);
+    const editorWidth=(storedEditorWidth>=420&&storedEditorWidth<=800)?storedEditorWidth:560;
+    if(isP&&!presentationEditing){document.body.classList.add('sidebar-collapsed');appLayout.style.gridTemplateColumns='0px minmax(0,1fr)';}
+    if(isP&&presentationEditing){document.body.classList.remove('sidebar-collapsed');appLayout.style.gridTemplateColumns=`${editorWidth}px minmax(0,1fr)`;}
+    if(isA){document.body.classList.remove('sidebar-collapsed');appLayout.style.gridTemplateColumns=`${editorWidth}px minmax(0,1fr)`;}
     if(isP&&!presentationEditing){
       presentationTitleInput.value=state.presentationTitle;
       presentationSubtitleInput.value=state.presentationSubtitle;
@@ -419,7 +422,13 @@
     exportJson.onclick=()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dados-dashboard-v6.4.json';a.click();URL.revokeObjectURL(a.href)};
     importJson.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=normalize(JSON.parse(r.result));renderEditors();render()}catch{alert('Arquivo JSON inválido.')}};r.readAsText(f)};
     reset.onclick=()=>{if(confirm('Zerar todos os valores numéricos? Meses, nomes, diretorias, superintendências e textos serão mantidos.')){zeroValues();renderEditors();render()}};
-    const setSidebar=collapsed=>document.body.classList.toggle('sidebar-collapsed',collapsed);
+    const setSidebar=collapsed=>{
+      document.body.classList.toggle('sidebar-collapsed',collapsed);
+      const app=document.getElementById('app');
+      const stored=parseInt(localStorage.getItem('dashboardEditorWidth')||'560',10);
+      const width=(stored>=420&&stored<=800)?stored:560;
+      app.style.gridTemplateColumns=collapsed?'0px minmax(0,1fr)':`${width}px minmax(0,1fr)`;
+    };
     collapseSidebar.onclick=()=>setSidebar(true); openSidebar.onclick=()=>setSidebar(false);
   }
   renderEditors();bind();initPageDarkMode();initEditorResize();renderPresentationControls();refreshAutomaticControls();render();
